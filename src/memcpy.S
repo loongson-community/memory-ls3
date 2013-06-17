@@ -67,7 +67,7 @@ memcpy_16_16:
     nop
     gslq    t0, t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     gssq    t0, t1, 0x0(a0)
     b       memcpy_16_16
     addiu   a0, a0, 0x10
@@ -78,7 +78,7 @@ memcpy_16_8:
     ld      t0, 0x8(a1)
     ld      t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     gssq    t0, t1, 0x0(a0)
     b       memcpy_16_8
     addiu   a0, a0, 0x10
@@ -91,7 +91,7 @@ memcpy_16_4:
     ldl     t1, 0x7(a1)
     ldr     t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     gssq    t0, t1, 0x0(a0)
     b       memcpy_16_4
     addiu   a0, a0, 0x10
@@ -115,7 +115,7 @@ memcpy_16_2:
     and     t1, t1, t3
     or      t1, t1, t2
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     gssq    t0, t1, 0x0(a0)
     b       memcpy_16_2
     addiu   a0, a0, 0x10
@@ -168,7 +168,7 @@ memcpy_16_1:
     or      t6, t4, t5
     or      t1, t1, t6
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     gssq    t0, t1, 0x0(a0)
     b       memcpy_16_1
     addiu   a0, a0, 0x10
@@ -178,7 +178,7 @@ memcpy_8_16:
     nop
     gslq    t0, t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     sd      t0, 0x8(a0)
     sd      t1, 0x0(a0)
     b       memcpy_8_16
@@ -189,7 +189,7 @@ memcpy_8_8:
     nop
     ld      t0, 0x0(a1)
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     sd      t0, 0x0(a0)
     b       memcpy_8_8
     addiu   a0, a0, 0x8
@@ -200,7 +200,7 @@ memcpy_8_4:
     ldl     t0, 0x7(a1)
     ldr     t0, 0x0(a1)
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     sd      t0, 0x0(a0)
     b       memcpy_8_4
     addiu   a0, a0, 0x8
@@ -217,7 +217,7 @@ memcpy_8_2:
     and     t0, t0, t3
     or      t0, t0, t2
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     sd      t0, 0x0(a0)
     b       memcpy_8_2
     addiu   a0, a0, 0x8
@@ -248,7 +248,7 @@ memcpy_8_1:
     or      t6, t4, t5
     or      t0, t0, t6
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     sd      t0, 0x0(a0)
     b       memcpy_8_1
     addiu   a0, a0, 0x8
@@ -258,7 +258,7 @@ memcpy_4_16:
     nop
     gslq    t0, t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     sdl     t1, 0x7(a0)
     sdr     t1, 0x0(a0)
     sdl     t0, 0xf(a0)
@@ -271,7 +271,7 @@ memcpy_4_8:
     nop
     ld      t0, 0x0(a1)
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     sdl     t0, 0x7(a0)
     sdr     t0, 0x0(a0)
     b       memcpy_4_8
@@ -282,7 +282,7 @@ memcpy_4_4:
     nop
     lwu     t0, 0x0(a1)
     addiu   a1, a1, 0x4
-    addi    a2, a2, -0x4
+    addiu   a2, a2, -0x4
     sw      t0, 0x0(a0)
     b       memcpy_4_4
     addiu   a0, a0, 0x4
@@ -293,7 +293,7 @@ memcpy_4_2:
     lwl     t0, 0x3(a1)
     lwr     t0, 0x0(a1)
     addiu   a1, a1, 0x4
-    addi    a2, a2, -0x4
+    addiu   a2, a2, -0x4
     sw      t0, 0x0(a0)
     b       memcpy_4_2
     addiu   a0, a0, 0x4
@@ -312,7 +312,7 @@ memcpy_4_1:
     lbu     t0, 0x0(a1)
     or      t0, t0, t3
     addiu   a1, a1, 0x4
-    addi    a2, a2, -0x4
+    addiu   a2, a2, -0x4
     sw      t0, 0x0(a0)
     b       memcpy_4_1
     addiu   a0, a0, 0x4
@@ -322,7 +322,7 @@ memcpy_2_16:
     nop
     gslq    t0, t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     swl     t1, 0x3(a0)
     swr     t1, 0x0(a0)
     dsrl    t1, t1, 32
@@ -341,7 +341,7 @@ memcpy_2_8:
     nop
     ld      t0, 0x0(a1)
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     swl     t0, 0x3(a0)
     swr     t0, 0x0(a0)
     dsrl    t0, t0, 32
@@ -355,7 +355,7 @@ memcpy_2_4:
     nop
     lwu     t0, 0x0(a1)
     addiu   a1, a1, 0x4
-    addi    a2, a2, -0x4
+    addiu   a2, a2, -0x4
     swl     t0, 0x3(a0)
     swr     t0, 0x0(a0)
     b       memcpy_2_4
@@ -366,7 +366,7 @@ memcpy_2_2:
     nop
     lhu     t0, 0x0(a1)
     addiu   a1, a1, 0x2
-    addi    a2, a2, -0x2
+    addiu   a2, a2, -0x2
     sh      t0, 0x0(a0)
     b       memcpy_2_2
     addiu   a0, a0, 0x2
@@ -379,7 +379,7 @@ memcpy_2_1:
     lbu     t0, 0x0(a1)
     or      t0, t0, t1
     addiu   a1, a1, 0x2
-    addi    a2, a2, -0x2
+    addiu   a2, a2, -0x2
     sh      t0, 0x0(a0)
     b       memcpy_2_1
     addiu   a0, a0, 0x2
@@ -389,7 +389,7 @@ memcpy_1_16:
     nop
     gslq    t0, t1, 0x0(a1)
     addiu   a1, a1, 0x10
-    addi    a2, a2, -0x10
+    addiu   a2, a2, -0x10
     sb      t1, 0x0(a0)
     dsrl    t1, t1, 8
     sb      t1, 0x1(a0)
@@ -428,7 +428,7 @@ memcpy_1_8:
     nop
     ld      t0, 0x0(a1)
     addiu   a1, a1, 0x8
-    addi    a2, a2, -0x8
+    addiu   a2, a2, -0x8
     sb      t0, 0x0(a0)
     dsrl    t0, t0, 8
     sb      t0, 0x1(a0)
@@ -452,7 +452,7 @@ memcpy_1_4:
     nop
     lwu     t0, 0x0(a1)
     addiu   a1, a1, 0x4
-    addi    a2, a2, -0x4
+    addiu   a2, a2, -0x4
     sb      t0, 0x0(a0)
     dsrl    t0, t0, 8
     sb      t0, 0x1(a0)
@@ -468,7 +468,7 @@ memcpy_1_2:
     nop
     lhu     t0, 0x0(a1)
     addiu   a1, a1, 0x2
-    addi    a2, a2, -0x2
+    addiu   a2, a2, -0x2
     sb      t0, 0x0(a0)
     dsrl    t0, t0, 8
     sb      t0, 0x1(a0)
