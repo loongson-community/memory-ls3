@@ -62,45 +62,69 @@ memcpy:
     or      v0, a0, zero
 
 memcpy_16_16:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_8_8
-    nop
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_8_8
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    gssq    t0, t1, 0x0(a0)
-    b       memcpy_16_16
+_memcpy_16_16_loop:
     addiu   a0, a0, 0x10
+    addiu   a1, a1, 0x10
+    gssq    t0, t1, -0x10(a0)
+    bnel    a1, a3, _memcpy_16_16_loop
+    gslq    t0, t1, 0x0(a1)
+    bgtz    AT, memcpy_8_8
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_16_8:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_8_8
-    nop
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_8_8
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     ld      t0, 0x8(a1)
+_memcpy_16_8_loop:
     ld      t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    gssq    t0, t1, 0x0(a0)
-    b       memcpy_16_8
     addiu   a0, a0, 0x10
-memcpy_16_4:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_4_4
+    addiu   a1, a1, 0x10
+    gssq    t0, t1, -0x10(a0)
+    bnel    a1, a3, _memcpy_16_8_loop
+    ld      t0, 0x8(a1)
+    bgtz    AT, memcpy_8_8
+    or      a2, AT, zero
+    jr      ra
     nop
+
+memcpy_16_4:
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_4_4
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     ldl     t0, 0xf(a1)
+_memcpy_16_4_loop:
     ldr     t0, 0x8(a1)
     ldl     t1, 0x7(a1)
     ldr     t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    gssq    t0, t1, 0x0(a0)
-    b       memcpy_16_4
     addiu   a0, a0, 0x10
+    addiu   a1, a1, 0x10
+    gssq    t0, t1, -0x10(a0)
+    bnel    a1, a3, _memcpy_16_4_loop
+    ldl     t0, 0xf(a1)
+    bgtz    AT, memcpy_4_4
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_16_2:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_2_2
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
     daddi   t3, zero, -1
+    addu    a3, a3, a1
     dsrl    t3, t3, 32
     lwl     t2, 0xf(a1)
+_memcpy_16_2_loop:
     lwr     t2, 0xc(a1)
     dsll    t2, t2, 32
     lwl     t0, 0xb(a1)
@@ -114,16 +138,23 @@ memcpy_16_2:
     lwr     t1, 0x0(a1)
     and     t1, t1, t3
     or      t1, t1, t2
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    gssq    t0, t1, 0x0(a0)
-    b       memcpy_16_2
     addiu   a0, a0, 0x10
-memcpy_16_1:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_1_1
+    addiu   a1, a1, 0x10
+    gssq    t0, t1, -0x10(a0)
+    bnel    a1, a3, _memcpy_16_2_loop
+    lwl     t2, 0xf(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
     nop
+
+memcpy_16_1:
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lbu     t7, 0xf(a1)
+_memcpy_16_1_loop:
     dsll    t7, t7, 56
     lbu     t6, 0xe(a1)
     dsll    t6, t6, 48
@@ -167,65 +198,101 @@ memcpy_16_1:
     or      t1, t1, t6
     or      t6, t4, t5
     or      t1, t1, t6
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    gssq    t0, t1, 0x0(a0)
-    b       memcpy_16_1
     addiu   a0, a0, 0x10
+    addiu   a1, a1, 0x10
+    gssq    t0, t1, -0x10(a0)
+    bnel    a1, a3, _memcpy_16_1_loop
+    lbu     t7, 0xf(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_8_16:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_8_8
-    nop
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_8_8
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    sd      t0, 0x8(a0)
-    sd      t1, 0x0(a0)
-    b       memcpy_8_16
+_memcpy_8_16_loop:
     addiu   a0, a0, 0x10
+    addiu   a1, a1, 0x10
+    sd      t0, -0x08(a0)
+    sd      t1, -0x10(a0)
+    bnel    a1, a3, _memcpy_8_16_loop
+    gslq    t0, t1, 0x0(a1)
+    bgtz    AT, memcpy_8_8
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_8_8:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_4_4
-    nop
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_4_4
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     ld      t0, 0x0(a1)
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    sd      t0, 0x0(a0)
-    b       memcpy_8_8
+_memcpy_8_8_loop:
     addiu   a0, a0, 0x8
-memcpy_8_4:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_4_4
+    addiu   a1, a1, 0x8
+    sd      t0, -0x8(a0)
+    bnel    a1, a3, _memcpy_8_8_loop
+    ld      t0, 0x0(a1)
+    bgtz    AT, memcpy_4_4
+    or      a2, AT, zero
+    jr      ra
     nop
+
+memcpy_8_4:
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_4_4
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     ldl     t0, 0x7(a1)
+_memcpy_8_4_loop:
     ldr     t0, 0x0(a1)
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    sd      t0, 0x0(a0)
-    b       memcpy_8_4
     addiu   a0, a0, 0x8
+    addiu   a1, a1, 0x8
+    sd      t0, -0x8(a0)
+    bnel    a1, a3, _memcpy_8_4_loop
+    ldl     t0, 0x7(a1)
+    bgtz    AT, memcpy_4_4
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_8_2:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_2_2
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
     daddi   t3, zero, -1
+    addu    a3, a3, a1
     dsrl    t3, t3, 32
     lwl     t2, 0x7(a1)
+_memcpy_8_2_loop:
     lwr     t2, 0x4(a1)
     dsll    t2, t2, 32
     lwl     t0, 0x3(a1)
     lwr     t0, 0x0(a1)
     and     t0, t0, t3
     or      t0, t0, t2
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    sd      t0, 0x0(a0)
-    b       memcpy_8_2
     addiu   a0, a0, 0x8
-memcpy_8_1:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_1_1
+    addiu   a1, a1, 0x8
+    sd      t0, -0x8(a0)
+    bnel    a1, a3, _memcpy_8_2_loop
+    lwl     t2, 0x7(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
     nop
+
+memcpy_8_1:
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lbu     t7, 0x7(a1)
+_memcpy_8_1_loop:
     dsll    t7, t7, 56
     lbu     t6, 0x6(a1)
     dsll    t6, t6, 48
@@ -247,61 +314,96 @@ memcpy_8_1:
     or      t0, t0, t6
     or      t6, t4, t5
     or      t0, t0, t6
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    sd      t0, 0x0(a0)
-    b       memcpy_8_1
     addiu   a0, a0, 0x8
+    addiu   a1, a1, 0x8
+    sd      t0, -0x8(a0)
+    bnel    a1, a3, _memcpy_8_1_loop
+    lbu     t7, 0x7(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_4_16:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_4_4
-    nop
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_4_4
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    sdl     t1, 0x7(a0)
-    sdr     t1, 0x0(a0)
-    sdl     t0, 0xf(a0)
-    sdr     t0, 0x8(a0)
-    b       memcpy_4_16
+_memcpy_4_16_loop:
     addiu   a0, a0, 0x10
+    addiu   a1, a1, 0x10
+    sdl     t1, -0x09(a0)
+    sdr     t1, -0x10(a0)
+    sdl     t0, -0x01(a0)
+    sdr     t0, -0x08(a0)
+    bnel    a1, a3, _memcpy_4_16_loop
+    gslq    t0, t1, 0x0(a1)
+    bgtz    AT, memcpy_4_4
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_4_8:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_4_4
-    nop
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_4_4
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     ld      t0, 0x0(a1)
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    sdl     t0, 0x7(a0)
-    sdr     t0, 0x0(a0)
-    b       memcpy_4_8
+_memcpy_4_8_loop:
     addiu   a0, a0, 0x8
+    addiu   a1, a1, 0x8
+    sdl     t0, -0x1(a0)
+    sdr     t0, -0x8(a0)
+    bnel    a1, a3, _memcpy_4_8_loop
+    ld      t0, 0x0(a1)
+    bgtz    AT, memcpy_4_4
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_4_4:
-    slti    AT, a2, 0x4
-    bnez    AT, memcpy_2_2
-    nop
+    andi    AT, a2, 0x3
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lwu     t0, 0x0(a1)
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    sw      t0, 0x0(a0)
-    b       memcpy_4_4
+_memcpy_4_4_loop:
     addiu   a0, a0, 0x4
+    addiu   a1, a1, 0x4
+    sw      t0, -0x4(a0)
+    bnel    a1, a3, _memcpy_4_4_loop
+    lwu     t0, 0x0(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_4_2:
-    slti    AT, a2, 0x4
-    bnez    AT, memcpy_2_2
-    nop
+    andi    AT, a2, 0x3
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lwl     t0, 0x3(a1)
+_memcpy_4_2_loop:
     lwr     t0, 0x0(a1)
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    sw      t0, 0x0(a0)
-    b       memcpy_4_2
     addiu   a0, a0, 0x4
-memcpy_4_1:
-    slti    AT, a2, 0x4
-    bnez    AT, memcpy_1_1
+    addiu   a1, a1, 0x4
+    sw      t0, -0x4(a0)
+    bnel    a1, a3, _memcpy_4_2_loop
+    lwl     t0, 0x3(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
     nop
+
+memcpy_4_1:
+    andi    AT, a2, 0x3
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lbu     t7, 0x3(a1)
+_memcpy_4_1_loop:
     dsll    t7, t7, 24
     lbu     t6, 0x2(a1)
     dsll    t6, t6, 16
@@ -311,169 +413,237 @@ memcpy_4_1:
     or      t3, t4, t5
     lbu     t0, 0x0(a1)
     or      t0, t0, t3
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    sw      t0, 0x0(a0)
-    b       memcpy_4_1
     addiu   a0, a0, 0x4
+    addiu   a1, a1, 0x4
+    sw      t0, -0x4(a0)
+    bnel    a1, a3, _memcpy_4_1_loop
+    lbu     t7, 0x3(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_2_16:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_2_2
-    nop
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    swl     t1, 0x3(a0)
-    swr     t1, 0x0(a0)
-    dsrl    t1, t1, 32
-    swl     t1, 0x7(a0)
-    swr     t1, 0x4(a0)
-    swl     t0, 0xb(a0)
-    swr     t0, 0x8(a0)
-    dsrl    t0, t0, 32
-    swl     t0, 0xf(a0)
-    swr     t0, 0xc(a0)
-    b       memcpy_2_16
+_memcpy_2_16_loop:
     addiu   a0, a0, 0x10
-memcpy_2_8:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_2_2
-    nop
-    ld      t0, 0x0(a1)
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    swl     t0, 0x3(a0)
-    swr     t0, 0x0(a0)
+    addiu   a1, a1, 0x10
+    swl     t1, -0x0d(a0)
+    swr     t1, -0x10(a0)
+    dsrl    t1, t1, 32
+    swl     t1, -0x09(a0)
+    swr     t1, -0x0c(a0)
+    swl     t0, -0x05(a0)
+    swr     t0, -0x08(a0)
     dsrl    t0, t0, 32
-    swl     t0, 0x7(a0)
-    swr     t0, 0x4(a0)
-    b       memcpy_2_8
+    swl     t0, -0x1(a0)
+    swr     t0, -0x4(a0)
+    bnel    a1, a3, _memcpy_2_16_loop
+    gslq    t0, t1, 0x0(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
+    nop
+
+memcpy_2_8:
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
+    addu    a3, a3, a1
+    ld      t0, 0x0(a1)
+_memcpy_2_8_loop:
     addiu   a0, a0, 0x8
+    addiu   a1, a1, 0x8
+    swl     t0, -0x5(a0)
+    swr     t0, -0x8(a0)
+    dsrl    t0, t0, 32
+    swl     t0, -0x1(a0)
+    swr     t0, -0x4(a0)
+    bnel    a1, a3, _memcpy_2_8_loop
+    ld      t0, 0x0(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_2_4:
-    slti    AT, a2, 0x4
-    bnez    AT, memcpy_2_2
-    nop
+    andi    AT, a2, 0x3
+    beq     AT, a2, memcpy_2_2
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lwu     t0, 0x0(a1)
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    swl     t0, 0x3(a0)
-    swr     t0, 0x0(a0)
-    b       memcpy_2_4
+_memcpy_2_4_loop:
     addiu   a0, a0, 0x4
+    addiu   a1, a1, 0x4
+    swl     t0, -0x1(a0)
+    swr     t0, -0x4(a0)
+    bnel    a1, a3, _memcpy_2_4_loop
+    lwu     t0, 0x0(a1)
+    bgtz    AT, memcpy_2_2
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_2_2:
-    slti    AT, a2, 0x2
-    bnez    AT, memcpy_1_1
-    nop
+    andi    AT, a2, 0x1
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lhu     t0, 0x0(a1)
-    addiu   a1, a1, 0x2
-    addiu   a2, a2, -0x2
-    sh      t0, 0x0(a0)
-    b       memcpy_2_2
+_memcpy_2_2_loop:
     addiu   a0, a0, 0x2
-memcpy_2_1:
-    slti    AT, a2, 0x2
-    bnez    AT, memcpy_1_1
+    addiu   a1, a1, 0x2
+    sh      t0, -0x2(a0)
+    bnel    a1, a3, _memcpy_2_2_loop
+    lhu     t0, 0x0(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
     nop
+
+memcpy_2_1:
+    andi    AT, a2, 0x1
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lbu     t1, 0x1(a1)
+_memcpy_2_1_loop:
     dsll    t1, t1, 8
     lbu     t0, 0x0(a1)
     or      t0, t0, t1
-    addiu   a1, a1, 0x2
-    addiu   a2, a2, -0x2
-    sh      t0, 0x0(a0)
-    b       memcpy_2_1
     addiu   a0, a0, 0x2
+    addiu   a1, a1, 0x2
+    sh      t0, -0x2(a0)
+    bnel    a1, a3, _memcpy_2_1_loop
+    lbu     t1, 0x1(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_1_16:
-    slti    AT, a2, 0x10
-    bnez    AT, memcpy_1_1
-    nop
+    andi    AT, a2, 0xf
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
-    addiu   a1, a1, 0x10
-    addiu   a2, a2, -0x10
-    sb      t1, 0x0(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x1(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x2(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x3(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x4(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x5(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x6(a0)
-    dsrl    t1, t1, 8
-    sb      t1, 0x7(a0)
-    sb      t0, 0x8(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x9(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0xa(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0xb(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0xc(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0xd(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0xe(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0xf(a0)
-    b       memcpy_1_16
+_memcpy_1_16_loop:
     addiu   a0, a0, 0x10
+    addiu   a1, a1, 0x10
+    sb      t1, -0x10(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x0f(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x0e(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x0d(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x0c(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x0b(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x0a(a0)
+    dsrl    t1, t1, 8
+    sb      t1, -0x09(a0)
+    sb      t0, -0x08(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x07(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x06(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x05(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x04(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x03(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x02(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x01(a0)
+    bnel    a1, a3, _memcpy_1_16_loop
+    gslq    t0, t1, 0x0(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_1_8:
-    slti    AT, a2, 0x8
-    bnez    AT, memcpy_1_1
-    nop
+    andi    AT, a2, 0x7
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     ld      t0, 0x0(a1)
-    addiu   a1, a1, 0x8
-    addiu   a2, a2, -0x8
-    sb      t0, 0x0(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x1(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x2(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x3(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x4(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x5(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x6(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x7(a0)
-    b       memcpy_1_8
+_memcpy_1_8_loop:
     addiu   a0, a0, 0x8
+    addiu   a1, a1, 0x8
+    sb      t0, -0x8(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x07(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x06(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x05(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x04(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x03(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x02(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x01(a0)
+    bnel    a1, a3, _memcpy_1_8_loop
+    ld      t0, 0x0(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_1_4:
-    slti    AT, a2, 0x4
-    bnez    AT, memcpy_1_1
-    nop
+    andi    AT, a2, 0x3
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
     lwu     t0, 0x0(a1)
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    sb      t0, 0x0(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x1(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x2(a0)
-    dsrl    t0, t0, 8
-    sb      t0, 0x3(a0)
-    b       memcpy_1_4
+_memcpy_1_4_loop:
     addiu   a0, a0, 0x4
-memcpy_1_2:
-    slti    AT, a2, 0x2
-    bnez    AT, memcpy_1_1
-    nop
-    lhu     t0, 0x0(a1)
-    addiu   a1, a1, 0x2
-    addiu   a2, a2, -0x2
-    sb      t0, 0x0(a0)
+    addiu   a1, a1, 0x4
+    sb      t0, -0x4(a0)
     dsrl    t0, t0, 8
-    sb      t0, 0x1(a0)
-    b       memcpy_1_2
+    sb      t0, -0x3(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x2(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x1(a0)
+    bnel    a1, a3, _memcpy_1_4_loop
+    lwu     t0, 0x0(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
+memcpy_1_2:
+    andi    AT, a2, 0x1
+    beq     AT, a2, memcpy_1_1
+    subu    a3, a2, AT
+    addu    a3, a3, a1
+    lhu     t0, 0x0(a1)
+_memcpy_1_2_loop:
     addiu   a0, a0, 0x2
+    addiu   a1, a1, 0x2
+    sb      t0, -0x2(a0)
+    dsrl    t0, t0, 8
+    sb      t0, -0x1(a0)
+    bnel    a1, a3, _memcpy_1_2_loop
+    lhu     t0, 0x0(a1)
+    bgtz    AT, memcpy_1_1
+    or      a2, AT, zero
+    jr      ra
+    nop
+
 memcpy_1_1:
     blez    a2, _memcpy_finish
     addu    a3, a1, a2
@@ -482,8 +652,9 @@ _memcpy_1_1_loop:
     addiu   a0, a0, 0x1
     addiu   a1, a1, 0x1
     sb      t0, -1(a0)
-    bne     a1, a3, _memcpy_1_1_loop
+    bnel    a1, a3, _memcpy_1_1_loop
     lbu     t0, 0x0(a1)
+
 _memcpy_finish:
     jr      ra
     nop
