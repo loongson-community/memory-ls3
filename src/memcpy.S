@@ -475,14 +475,15 @@ memcpy_1_2:
     b       memcpy_1_2
     addiu   a0, a0, 0x2
 memcpy_1_1:
-    beqz    a2, _memcpy_finish
-    nop
+    blez    a2, _memcpy_finish
+    addu    a3, a1, a2
     lbu     t0, 0x0(a1)
-    addiu   a1, a1, 0x1
-    addi    a2, a2, -0x1
-    sb      t0, 0x0(a0)
-    b       memcpy_1_1
+_memcpy_1_1_loop:
     addiu   a0, a0, 0x1
+    addiu   a1, a1, 0x1
+    sb      t0, -1(a0)
+    bne     a1, a3, _memcpy_1_1_loop
+    lbu     t0, 0x0(a1)
 _memcpy_finish:
     jr      ra
     nop
