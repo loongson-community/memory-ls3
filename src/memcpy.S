@@ -140,24 +140,20 @@ memcpy_16_2:
     andi    AT, a2, 0xf
     beq     AT, a2, memcpy_2_2
     subu    a3, a2, AT
-    daddi   t3, zero, -1
     addu    a3, a3, a1
-    dsrl    t3, t3, 32
     lwl     t2, 0xf(a1)
 _memcpy_16_2_loop:
     lwr     t2, 0xc(a1)
-    dsll    t2, t2, 32
     lwl     t0, 0xb(a1)
     lwr     t0, 0x8(a1)
-    and     t0, t0, t3
-    or      t0, t0, t2
+    .set    arch=mips64r2
+    dins    t0, t2, 32, 32
     lwl     t2, 0x7(a1)
     lwr     t2, 0x4(a1)
-    dsll    t2, t2, 32
     lwl     t1, 0x3(a1)
     lwr     t1, 0x0(a1)
-    and     t1, t1, t3
-    or      t1, t1, t2
+    dins    t1, t2, 32, 32
+    .set    arch=loongson3a
     addiu   a0, a0, 0x10
     addiu   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
@@ -173,56 +169,44 @@ memcpy_16_1:
     beq     AT, a2, _memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
-    lbu     t7, 0xf(a1)
-_memcpy_16_1_loop:
-    dsll    t7, t7, 56
-    lbu     t6, 0xe(a1)
-    dsll    t6, t6, 48
-    or      t5, t6, t7
-    lbu     t7, 0xd(a1)
-    dsll    t7, t7, 40
-    lbu     t6, 0xc(a1)
-    dsll    t6, t6, 32
-    or      t4, t6, t7
-    lbu     t7, 0xb(a1)
-    dsll    t7, t7, 24
-    lbu     t6, 0xa(a1)
-    dsll    t6, t6, 16
-    or      t3, t6, t7
-    lbu     t7, 0x9(a1)
-    dsll    t7, t7, 8
     lbu     t0, 0x8(a1)
-    or      t6, t7, t3
-    or      t0, t0, t6
-    or      t6, t4, t5
-    or      t0, t0, t6
-    lbu     t7, 0x7(a1)
-    dsll    t7, t7, 56
-    lbu     t6, 0x6(a1)
-    dsll    t6, t6, 48
-    or      t5, t6, t7
-    lbu     t7, 0x5(a1)
-    dsll    t7, t7, 40
-    lbu     t6, 0x4(a1)
-    dsll    t6, t6, 32
-    or      t4, t6, t7
-    lbu     t7, 0x3(a1)
-    dsll    t7, t7, 24
-    lbu     t6, 0x2(a1)
-    dsll    t6, t6, 16
-    or      t3, t6, t7
-    lbu     t7, 0x1(a1)
-    dsll    t7, t7, 8
+_memcpy_16_1_loop:
+    lbu     t2, 0x9(a1)
+    .set    arch=mips64r2
+    dins    t0, t2, 8, 8
+    lbu     t2, 0xa(a1)
+    dins    t0, t2, 16, 8
+    lbu     t2, 0xb(a1)
+    dins    t0, t2, 24, 8
+    lbu     t2, 0xc(a1)
+    dins    t0, t2, 32, 8
+    lbu     t2, 0xd(a1)
+    dins    t0, t2, 40, 8
+    lbu     t2, 0xe(a1)
+    dins    t0, t2, 48, 8
+    lbu     t2, 0xf(a1)
+    dins    t0, t2, 56, 8
     lbu     t1, 0x0(a1)
-    or      t6, t7, t3
-    or      t1, t1, t6
-    or      t6, t4, t5
-    or      t1, t1, t6
+    lbu     t2, 0x1(a1)
+    dins    t1, t2, 8, 8
+    lbu     t2, 0x2(a1)
+    dins    t1, t2, 16, 8
+    lbu     t2, 0x3(a1)
+    dins    t1, t2, 24, 8
+    lbu     t2, 0x4(a1)
+    dins    t1, t2, 32, 8
+    lbu     t2, 0x5(a1)
+    dinsu   t1, t2, 40, 8
+    lbu     t2, 0x6(a1)
+    dinsu   t1, t2, 48, 8
+    lbu     t2, 0x7(a1)
+    dinsu   t1, t2, 56, 8
+    .set    arch=loongson3a
     addiu   a0, a0, 0x10
     addiu   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_1_loop
-    lbu     t7, 0xf(a1)
+    lbu     t0, 0x8(a1)
     bgtz    AT, _memcpy_1_1
     or      a2, AT, zero
     jr      ra
@@ -298,17 +282,15 @@ memcpy_8_2:
     andi    AT, a2, 0x7
     beq     AT, a2, memcpy_2_2
     subu    a3, a2, AT
-    daddi   t3, zero, -1
     addu    a3, a3, a1
-    dsrl    t3, t3, 32
     lwl     t2, 0x7(a1)
 _memcpy_8_2_loop:
     lwr     t2, 0x4(a1)
-    dsll    t2, t2, 32
     lwl     t0, 0x3(a1)
     lwr     t0, 0x0(a1)
-    and     t0, t0, t3
-    or      t0, t0, t2
+    .set    arch=mips64r2
+    dins    t0, t2, 32, 32
+    .set    arch=loongson3a
     addiu   a0, a0, 0x8
     addiu   a1, a1, 0x8
     sd      t0, -0x8(a0)
@@ -324,34 +306,29 @@ memcpy_8_1:
     beq     AT, a2, _memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
-    lbu     t7, 0x7(a1)
-_memcpy_8_1_loop:
-    dsll    t7, t7, 56
-    lbu     t6, 0x6(a1)
-    dsll    t6, t6, 48
-    or      t5, t6, t7
-    lbu     t7, 0x5(a1)
-    dsll    t7, t7, 40
-    lbu     t6, 0x4(a1)
-    dsll    t6, t6, 32
-    or      t4, t6, t7
-    lbu     t7, 0x3(a1)
-    dsll    t7, t7, 24
-    lbu     t6, 0x2(a1)
-    dsll    t6, t6, 16
-    or      t3, t6, t7
-    lbu     t7, 0x1(a1)
-    dsll    t7, t7, 8
     lbu     t0, 0x0(a1)
-    or      t6, t7, t3
-    or      t0, t0, t6
-    or      t6, t4, t5
-    or      t0, t0, t6
+_memcpy_8_1_loop:
+    lbu     t2, 0x1(a1)
+    .set    arch=mips64r2
+    dins    t0, t2, 8, 8
+    lbu     t2, 0x2(a1)
+    dins    t0, t2, 16, 8
+    lbu     t2, 0x3(a1)
+    dins    t0, t2, 24, 8
+    lbu     t2, 0x4(a1)
+    dins    t0, t2, 32, 8
+    lbu     t2, 0x5(a1)
+    dinsu   t0, t2, 40, 8
+    lbu     t2, 0x6(a1)
+    dinsu   t0, t2, 48, 8
+    lbu     t2, 0x7(a1)
+    dinsu   t0, t2, 56, 8
+    .set    arch=loongson3a
     addiu   a0, a0, 0x8
     addiu   a1, a1, 0x8
     sd      t0, -0x8(a0)
     bnel    a1, a3, _memcpy_8_1_loop
-    lbu     t7, 0x7(a1)
+    lbu     t0, 0x0(a1)
     bgtz    AT, _memcpy_1_1
     or      a2, AT, zero
     jr      ra
@@ -451,22 +428,21 @@ memcpy_4_1:
     beq     AT, a2, _memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
-    lbu     t7, 0x3(a1)
-_memcpy_4_1_loop:
-    dsll    t7, t7, 24
-    lbu     t6, 0x2(a1)
-    dsll    t6, t6, 16
-    or      t5, t6, t7
-    lbu     t4, 0x1(a1)
-    dsll    t4, t4, 8
-    or      t3, t4, t5
     lbu     t0, 0x0(a1)
-    or      t0, t0, t3
+_memcpy_4_1_loop:
+    lbu     t2, 0x1(a1)
+    .set    arch=mips64r2
+    ins     t0, t2, 8, 8
+    lbu     t2, 0x2(a1)
+    ins     t0, t2, 16, 8
+    lbu     t2, 0x3(a1)
+    ins     t0, t2, 24, 8
+    .set    arch=loongson3a
     addiu   a0, a0, 0x4
     addiu   a1, a1, 0x4
     sw      t0, -0x4(a0)
     bnel    a1, a3, _memcpy_4_1_loop
-    lbu     t7, 0x3(a1)
+    lbu     t0, 0x0(a1)
     bgtz    AT, _memcpy_1_1
     or      a2, AT, zero
     jr      ra
