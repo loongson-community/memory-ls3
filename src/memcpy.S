@@ -20,8 +20,50 @@
     .set    noat
     .set    arch=loongson3a
 
+    .type    memcpy_entries, @object
+    .size    memcpy_entries, 548
+memcpy_entries:
+    .word    memcpy_1_1
+    .word    memcpy_1_2
+    .word    memcpy_1_4
+    .space   4
+    .word    memcpy_1_8
+    .space   12
+    .word    memcpy_1_16
+    .space   28
+    .word    memcpy_2_1
+    .word    memcpy_2_2
+    .word    memcpy_2_4
+    .space   4
+    .word    memcpy_2_8
+    .space   12
+    .word    memcpy_2_16
+    .space   28
+    .word    memcpy_4_1
+    .word    memcpy_4_2
+    .word    memcpy_4_4
+    .space   4
+    .word    memcpy_4_8
+    .space   12
+    .word    memcpy_4_16
+    .space   92
+    .word    memcpy_8_1
+    .word    memcpy_8_2
+    .word    memcpy_8_4
+    .space   4
+    .word    memcpy_8_8
+    .space   12
+    .word    memcpy_8_16
+    .space   220
+    .word    memcpy_16_1
+    .word    memcpy_16_2
+    .word    memcpy_16_4
+    .space   4
+    .word    memcpy_16_8
+    .space   12
+    .word    memcpy_16_16
+
 memcpy:
-    .cpload jp
     /* Check if the copy size is less then 8 bytes */
     sltiu   AT, a2, 0x8
     bnez    AT, _memcpy_1_1
@@ -58,9 +100,9 @@ memcpy:
     srl     t1, t1, t2
     or      t0, t0, t1
     sll     t0, t0, 0x2
-    lw      t2, %got(memcpy_entries)(gp)
+    addiu   t2, jp, memcpy_entries-memcpy
     addu    t2, t2, t0
-    lw      t2, %lo(memcpy_entries)(t2)
+    lw      t2, 0x0(t2)
     /* Jump to target memcpy entry */
     jr      t2
     or      v0, a0, zero
@@ -695,49 +737,4 @@ _memcpy_finish:
 
     .end    memcpy
     .set    pop
-
-    .data
-    .align   2
-    .type    memcpy_entries, @object
-    .size    memcpy_entries, 548
-memcpy_entries:
-    .word    memcpy_1_1
-    .word    memcpy_1_2
-    .word    memcpy_1_4
-    .space   4
-    .word    memcpy_1_8
-    .space   12
-    .word    memcpy_1_16
-    .space   28
-    .word    memcpy_2_1
-    .word    memcpy_2_2
-    .word    memcpy_2_4
-    .space   4
-    .word    memcpy_2_8
-    .space   12
-    .word    memcpy_2_16
-    .space   28
-    .word    memcpy_4_1
-    .word    memcpy_4_2
-    .word    memcpy_4_4
-    .space   4
-    .word    memcpy_4_8
-    .space   12
-    .word    memcpy_4_16
-    .space   92
-    .word    memcpy_8_1
-    .word    memcpy_8_2
-    .word    memcpy_8_4
-    .space   4
-    .word    memcpy_8_8
-    .space   12
-    .word    memcpy_8_16
-    .space   220
-    .word    memcpy_16_1
-    .word    memcpy_16_2
-    .word    memcpy_16_4
-    .space   4
-    .word    memcpy_16_8
-    .space   12
-    .word    memcpy_16_16
 
