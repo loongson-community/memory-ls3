@@ -64,10 +64,6 @@ memcpy_entries:
     .word    memcpy_8_8
 
 memcpy:
-    /* Check if the copy size is less then 8 bytes */
-    sltiu   AT, a2, 0x8
-    bnez    AT, _memcpy_1_1
-    or      v0, a0, zero
     /* Calculate memcpy sub entry index */
     /* s1 */
     andi    t2, a0, 0xf
@@ -87,20 +83,9 @@ memcpy:
     jr      t2
     or      v0, a0, zero
 
-_memcpy_8_8_16_16:
-    sdl     t0, 0x7(a0)
-_memcpy_4_4_16_16:
-    ori     t2, zero, 0x4
-    sltiu   AT, AT, 0xc
-    or      a3, a0, zero
-    sll     t2, t2, AT
-    addu    a0, a0, t2
-    addu    a1, a1, t2
-    subu    a2, a2, t2
-    sdr     t0, 0x0(a3)
 memcpy_16_16:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_8_8
+    beq     AT, a2, memcpy_8_8
     subu    a3, a2, AT
     addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
@@ -110,19 +95,14 @@ _memcpy_16_16_loop:
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_16_loop
     gslq    t0, t1, 0x0(a1)
-    bgtz    AT, _memcpy_8_8
+    bgtz    AT, memcpy_8_8
     or      a2, AT, zero
     jr      ra
     nop
 
-_memcpy_4_4_16_8:
-    addiu   a0, a0, 0x4
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    sw      t0, -0x4(a0)
 memcpy_16_8:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_8_8
+    beq     AT, a2, memcpy_8_8
     subu    a3, a2, AT
     addu    a3, a3, a1
     ld      t0, 0x8(a1)
@@ -133,14 +113,14 @@ _memcpy_16_8_loop:
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_8_loop
     ld      t0, 0x8(a1)
-    bgtz    AT, _memcpy_8_8
+    bgtz    AT, memcpy_8_8
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_16_4:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_4_4
+    beq     AT, a2, memcpy_4_4
     subu    a3, a2, AT
     addu    a3, a3, a1
     ldl     t0, 0xf(a1)
@@ -153,7 +133,7 @@ _memcpy_16_4_loop:
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_4_loop
     ldl     t0, 0xf(a1)
-    bgtz    AT, _memcpy_4_4
+    bgtz    AT, memcpy_4_4
     or      a2, AT, zero
     jr      ra
     nop
@@ -188,7 +168,7 @@ _memcpy_16_2_loop:
 
 memcpy_16_1:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lbu     t0, 0x8(a1)
@@ -229,19 +209,14 @@ _memcpy_16_1_loop:
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_1_loop
     lbu     t0, 0x8(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
-_memcpy_4_4_8_16:
-    addiu   a0, a0, 0x4
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
-    sw      t0, -0x4(a0)
 memcpy_8_16:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_8_8
+    beq     AT, a2, memcpy_8_8
     subu    a3, a2, AT
     addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
@@ -252,22 +227,14 @@ _memcpy_8_16_loop:
     sd      t1, -0x10(a0)
     bnel    a1, a3, _memcpy_8_16_loop
     gslq    t0, t1, 0x0(a1)
-    bgtz    AT, _memcpy_8_8
+    bgtz    AT, memcpy_8_8
     or      a2, AT, zero
     jr      ra
     nop
 
-_memcpy_4_4_8_8:
-    addiu   a0, a0, 0x4
-    addiu   a1, a1, 0x4
-    addiu   a2, a2, -0x4
 memcpy_8_8:
-    sltiu   AT, a2, 0x18
-    beqz    AT, _memcpy_8_8_16_16
-    ld      t0, 0x0(a1)
-_memcpy_8_8:
     andi    AT, a2, 0x7
-    beq     AT, a2, _memcpy_4_4
+    beq     AT, a2, memcpy_4_4
     subu    a3, a2, AT
     addu    a3, a3, a1
     ld      t0, 0x0(a1)
@@ -277,14 +244,14 @@ _memcpy_8_8_loop:
     sd      t0, -0x8(a0)
     bnel    a1, a3, _memcpy_8_8_loop
     ld      t0, 0x0(a1)
-    bgtz    AT, _memcpy_4_4
+    bgtz    AT, memcpy_4_4
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_8_4:
     andi    AT, a2, 0x7
-    beq     AT, a2, _memcpy_4_4
+    beq     AT, a2, memcpy_4_4
     subu    a3, a2, AT
     addu    a3, a3, a1
     ldl     t0, 0x7(a1)
@@ -295,7 +262,7 @@ _memcpy_8_4_loop:
     sd      t0, -0x8(a0)
     bnel    a1, a3, _memcpy_8_4_loop
     ldl     t0, 0x7(a1)
-    bgtz    AT, _memcpy_4_4
+    bgtz    AT, memcpy_4_4
     or      a2, AT, zero
     jr      ra
     nop
@@ -325,7 +292,7 @@ _memcpy_8_2_loop:
 
 memcpy_8_1:
     andi    AT, a2, 0x7
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lbu     t0, 0x0(a1)
@@ -351,14 +318,14 @@ _memcpy_8_1_loop:
     sd      t0, -0x8(a0)
     bnel    a1, a3, _memcpy_8_1_loop
     lbu     t0, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_4_16:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_4_4
+    beq     AT, a2, memcpy_4_4
     subu    a3, a2, AT
     addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
@@ -371,14 +338,14 @@ _memcpy_4_16_loop:
     sdr     t0, -0x08(a0)
     bnel    a1, a3, _memcpy_4_16_loop
     gslq    t0, t1, 0x0(a1)
-    bgtz    AT, _memcpy_4_4
+    bgtz    AT, memcpy_4_4
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_4_8:
     andi    AT, a2, 0x7
-    beq     AT, a2, _memcpy_4_4
+    beq     AT, a2, memcpy_4_4
     subu    a3, a2, AT
     addu    a3, a3, a1
     ld      t0, 0x0(a1)
@@ -389,16 +356,12 @@ _memcpy_4_8_loop:
     sdr     t0, -0x8(a0)
     bnel    a1, a3, _memcpy_4_8_loop
     ld      t0, 0x0(a1)
-    bgtz    AT, _memcpy_4_4
+    bgtz    AT, memcpy_4_4
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_4_4:
-    sltiu   AT, a2, 0x14
-    beqz    AT, _memcpy_4_4_up
-    ori     a3, zero, 0xc
-_memcpy_4_4:
     andi    AT, a2, 0x3
     beq     AT, a2, memcpy_2_2
     subu    a3, a2, AT
@@ -414,18 +377,6 @@ _memcpy_4_4_loop:
     or      a2, AT, zero
     jr      ra
     nop
-_memcpy_4_4_up:
-    andi    t2, a0, 0xf
-    andi    t3, a1, 0xf
-    and     AT, t2, t3
-    beq     AT, a3, _memcpy_4_4_16_16
-    lwu     t0, 0x0(a1)
-    beq     t2, a3, _memcpy_4_4_16_8
-    ld      zero, 0xc(a1)
-    beq     t3, a3, _memcpy_4_4_8_16
-    ld      zero, 0xc(a1)
-    b       _memcpy_4_4_8_8
-    sw      t0, 0x0(a0)
 
 memcpy_4_2:
     andi    AT, a2, 0x3
@@ -447,7 +398,7 @@ _memcpy_4_2_loop:
 
 memcpy_4_1:
     andi    AT, a2, 0x3
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lbu     t0, 0x0(a1)
@@ -465,7 +416,7 @@ _memcpy_4_1_loop:
     sw      t0, -0x4(a0)
     bnel    a1, a3, _memcpy_4_1_loop
     lbu     t0, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
@@ -535,14 +486,9 @@ _memcpy_2_4_loop:
     jr      ra
     nop
 
-_memcpy_1_1_2_2:
-    addiu   a0, a0, 0x1
-    addiu   a1, a1, 0x1
-    addiu   a2, a2, -0x1
-    sb      t0, -0x1(a0)
 memcpy_2_2:
     andi    AT, a2, 0x1
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lhu     t0, 0x0(a1)
@@ -552,14 +498,14 @@ _memcpy_2_2_loop:
     sh      t0, -0x2(a0)
     bnel    a1, a3, _memcpy_2_2_loop
     lhu     t0, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_2_1:
     andi    AT, a2, 0x1
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lbu     t1, 0x1(a1)
@@ -572,14 +518,14 @@ _memcpy_2_1_loop:
     sh      t0, -0x2(a0)
     bnel    a1, a3, _memcpy_2_1_loop
     lbu     t1, 0x1(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_1_16:
     andi    AT, a2, 0xf
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     gslq    t0, t1, 0x0(a1)
@@ -618,14 +564,14 @@ _memcpy_1_16_loop:
     sb      t0, -0x01(a0)
     bnel    a1, a3, _memcpy_1_16_loop
     gslq    t0, t1, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_1_8:
     andi    AT, a2, 0x7
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     ld      t0, 0x0(a1)
@@ -649,14 +595,14 @@ _memcpy_1_8_loop:
     sb      t0, -0x01(a0)
     bnel    a1, a3, _memcpy_1_8_loop
     ld      t0, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_1_4:
     andi    AT, a2, 0x3
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lwu     t0, 0x0(a1)
@@ -672,14 +618,14 @@ _memcpy_1_4_loop:
     sb      t0, -0x1(a0)
     bnel    a1, a3, _memcpy_1_4_loop
     lwu     t0, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_1_2:
     andi    AT, a2, 0x1
-    beq     AT, a2, _memcpy_1_1
+    beq     AT, a2, memcpy_1_1
     subu    a3, a2, AT
     addu    a3, a3, a1
     lhu     t0, 0x0(a1)
@@ -691,16 +637,12 @@ _memcpy_1_2_loop:
     sb      t0, -0x1(a0)
     bnel    a1, a3, _memcpy_1_2_loop
     lhu     t0, 0x0(a1)
-    bgtz    AT, _memcpy_1_1
+    bgtz    AT, memcpy_1_1
     or      a2, AT, zero
     jr      ra
     nop
 
 memcpy_1_1:
-    sltiu   AT, a2, 0x3
-    beqz    AT, _memcpy_1_1_2_2
-    lbu     t0, 0x0(a1)
-_memcpy_1_1:
     blez    a2, _memcpy_finish
     addu    a3, a1, a2
     lbu     t0, 0x0(a1)
