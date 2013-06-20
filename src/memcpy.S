@@ -23,45 +23,45 @@
     .type    memcpy_entries, @object
     .size    memcpy_entries, 548
 memcpy_entries:
-    .word    memcpy_1_1
-    .word    memcpy_1_2
-    .word    memcpy_1_4
-    .space   4
-    .word    memcpy_1_8
-    .space   12
-    .word    memcpy_1_16
-    .space   28
-    .word    memcpy_2_1
-    .word    memcpy_2_2
-    .word    memcpy_2_4
-    .space   4
-    .word    memcpy_2_8
-    .space   12
-    .word    memcpy_2_16
-    .space   28
-    .word    memcpy_4_1
-    .word    memcpy_4_2
-    .word    memcpy_4_4
-    .space   4
-    .word    memcpy_4_8
-    .space   12
-    .word    memcpy_4_16
-    .space   92
-    .word    memcpy_8_1
-    .word    memcpy_8_2
-    .word    memcpy_8_4
-    .space   4
-    .word    memcpy_8_8
-    .space   12
-    .word    memcpy_8_16
-    .space   220
+    .word    memcpy_16_16
     .word    memcpy_16_1
     .word    memcpy_16_2
-    .word    memcpy_16_4
     .space   4
-    .word    memcpy_16_8
+    .word    memcpy_16_4
     .space   12
-    .word    memcpy_16_16
+    .word    memcpy_16_8
+    .space   28
+    .word    memcpy_1_16
+    .word    memcpy_1_1
+    .word    memcpy_1_2
+    .space   4
+    .word    memcpy_1_4
+    .space   12
+    .word    memcpy_1_8
+    .space   28
+    .word    memcpy_2_16
+    .word    memcpy_2_1
+    .word    memcpy_2_2
+    .space   4
+    .word    memcpy_2_4
+    .space   12
+    .word    memcpy_2_8
+    .space   92
+    .word    memcpy_4_16
+    .word    memcpy_4_1
+    .word    memcpy_4_2
+    .space   4
+    .word    memcpy_4_4
+    .space   12
+    .word    memcpy_4_8
+    .space   220
+    .word    memcpy_8_16
+    .word    memcpy_8_1
+    .word    memcpy_8_2
+    .space   4
+    .word    memcpy_8_4
+    .space   12
+    .word    memcpy_8_8
 
 memcpy:
     /* Check if the copy size is less then 8 bytes */
@@ -70,34 +70,14 @@ memcpy:
     or      v0, a0, zero
     /* Calculate memcpy sub entry index */
     /* s1 */
-    ori     t0, zero, 0x8
-    andi    t2, a0, 0xf /* 16-byte */
-    sgt     t2, t2, zero
-    srl     t0, t0, t2
-    andi    t2, a0, 0x7 /* 8-byte */
-    sgt     t2, t2, zero
-    srl     t0, t0, t2
-    andi    t2, a0, 0x3 /* 4-byte */
-    sgt     t2, t2, zero
-    srl     t0, t0, t2
-    andi    t2, a0, 0x1 /* 2-byte */
-    sgt     t2, t2, zero
-    srl     t0, t0, t2
-    sll     t0, t0, 0x4
+    andi    t2, a0, 0xf
+    subu    t1, zero, t2
+    and     t1, t1, t2
+    sll     t1, t1, 0x4
     /* s2 */
-    ori     t1, zero, 0x8
-    andi    t2, a1, 0xf /* 16-byte */
-    sgt     t2, t2, zero
-    srl     t1, t1, t2
-    andi    t2, a1, 0x7 /* 8-byte */
-    sgt     t2, t2, zero
-    srl     t1, t1, t2
-    andi    t2, a1, 0x3 /* 4-byte */
-    sgt     t2, t2, zero
-    srl     t1, t1, t2
-    andi    t2, a1, 0x1 /* 2-byte */
-    sgt     t2, t2, zero
-    srl     t1, t1, t2
+    andi    t2, a1, 0xf
+    subu    t0, zero, t2
+    and     t0, t0, t2
     or      t0, t0, t1
     sll     t0, t0, 0x2
     addiu   t2, jp, memcpy_entries-memcpy
