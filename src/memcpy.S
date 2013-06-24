@@ -13,12 +13,6 @@
 /* void * memcpy (void *s1, const void *s2, size_t n); */
     .text    
     .align  2
-    .globl  memcpy
-    .ent    memcpy, 0
-    .set    push
-    .set    noreorder    
-    .set    noat
-    .set    arch=loongson3a
 
     .type   _memcpy_loop_entries, @object
     .size   _memcpy_loop_entries, 52
@@ -34,6 +28,13 @@ _memcpy_loop_entries:
     .word   _memcpy_4_16
     .word   _memcpy_8_16
     .word   _memcpy_16_16
+
+    .globl  memcpy
+    .ent    memcpy, 0
+    .set    push
+    .set    noreorder    
+    .set    noat
+    .set    arch=loongson3a
 
 memcpy:
     /* if less then 0x1f bytes */
