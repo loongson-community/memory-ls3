@@ -21,7 +21,7 @@
     .set    arch=loongson3a
 
     .type   _memcpy_loop_entries, @object
-    .size   _memcpy_loop_entries, 48
+    .size   _memcpy_loop_entries, 52
 _memcpy_loop_entries:
     .word   _memcpy_16_1
     .word   _memcpy_16_2
@@ -33,50 +33,37 @@ _memcpy_loop_entries:
     .word   _memcpy_2_16
     .word   _memcpy_4_16
     .word   _memcpy_8_16
+    .word   _memcpy_16_16
 
 memcpy:
+    /* if less then 0x1f bytes */
     sltiu   t2, a2, 0x1f
+    addiu   t8, jp, _memcpy_1_1_base-memcpy
     bnez    t2, _memcpy_less
     or      v0, a0, zero
-    /* s1 % 16 = [1, 16] */
     andi    t0, a0, 0xf
-    sltiu   t2, t0, 0x1
-    sll     t2, t2, 0x4
-    addu    t0, t2, t0
-    /* s2 % 16 = [1, 16]*/
     andi    t1, a1, 0xf
-    sltiu   t2, t1, 0x1
-    sll     t2, t2, 0x4
-    addu    t1, t2, t1
-    /* index (bit 3) */
-    sltu    t2, t0, t1
-    sll     t7, t2, 0x3
-    /* sort */
-    subu    t2, zero, t2
-    nor     t3, t2, zero
-    /* t6 = MIN (t0, t1) */
-    and     t4, t0, t2
-    and     t5, t1, t3
-    addu    t6, t4, t5
-    /* t1 = MAX (t0, t1) */
-    and     t4, t0, t3
-    and     t5, t1, t2
-    addu    t1, t4, t5
     /* index (bit 2-0) */
-    subu    t2, t1, t6
+    subu    t2, t0, t1
     ori     t2, t2, 0x10
-    subu    t3, zero, t2
-    and     t2, t2, t3
-    ori     t3, zero, 0x1f
+    subu    t5, zero, t2
+    and     t2, t2, t5
+    ori     t5, zero, 0x1f
     clz     t2, t2
-    subu    t2, t3, t2
+    /* if have 16-byte aligned address */
+    sll     t3, t0, t1
+    beq     t3, t0, _memcpy_have_16
+    subu    t7, t5, t2
+    /* index (bit 3) */
+    sltu    t4, t0, t1
+    sll     t2, t4, 0x3
     /* calculate the entry address by index */
     or      t6, t7, t2
     sll     t6, t6, 0x2
     addiu   t2, jp, _memcpy_loop_entries-memcpy
-    addu    t2, t2, t6
-    lw      t7, 0x0(t2)
+    gslwx   t7, 0x0(t2, t6)
     /* head padding */
+    movz    t1, t0, t4
     ori     t3, zero, 0x10
     subu    t3, t3, t1
     /* calculate s1, s2, n (16-byte aligned) */
@@ -89,19 +76,33 @@ memcpy:
     /* goto head padding copies */
     sll     t3, t3, 0x3
     sll     t4, a2, 0x3
-    addiu   t5, jp, _memcpy_1_1_base-memcpy
-    subu    t6, t5, t3
+    subu    t6, t8, t3
     jr      t6
-    subu    t8, t5, t4
+    subu    t8, t8, t4
 
 _memcpy_less:
     addu    a0, a0, a2
     addu    a1, a1, a2
     sll     a2, a2, 0x3
-    addiu   t0, jp, _memcpy_1_1_base-memcpy
-    subu    t0, t0, a2
+    subu    t0, t8, a2
     jr      t0
     or      t7, ra, zero
+
+_memcpy_have_16:
+    /* index (bit 3) */
+    sltiu   t4, t1, 0x1
+    sll     t2, t4, 0x3
+    /* calculate the entry address by index */
+    or      t6, t7, t2
+    sll     t6, t6, 0x2
+    addiu   t2, jp, _memcpy_loop_entries-memcpy
+    gslwx   t7, 0x0(t2, t6)
+    addu    a3, a1, a2
+    andi    a2, a2, 0xf
+    subu    a3, a3, a2
+    sll     t2, a2, 0x3
+    jr      t7
+    subu    t8, t8, t2
 
 _memcpy_16_16:
     gslq    t0, t1, 0x0(a1)
