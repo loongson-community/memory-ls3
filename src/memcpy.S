@@ -153,24 +153,28 @@ _memcpy_16_4_loop:
     or      t7, ra, zero
 
 _memcpy_16_2:
-    lwl     t2, 0xf(a1)
+    lhu     t4, 0xe(a1)
 _memcpy_16_2_loop:
-    lwr     t2, 0xc(a1)
-    lwl     t0, 0xb(a1)
-    lwr     t0, 0x8(a1)
+    lhu     t3, 0xc(a1)
+    lhu     t2, 0xa(a1)
+    lhu     t0, 0x8(a1)
     .set    arch=mips64r2
-    dins    t0, t2, 32, 32
-    lwl     t2, 0x7(a1)
-    lwr     t2, 0x4(a1)
-    lwl     t1, 0x3(a1)
-    lwr     t1, 0x0(a1)
-    dins    t1, t2, 32, 32
-    .set    arch=loongson3a
+    lhu     t5, 0x6(a1)
+    dins    t0, t4, 48, 16
+    dins    t0, t3, 32, 16
+    lhu     t4, 0x4(a1)
+    lhu     t3, 0x2(a1)
+    lhu     t1, 0x0(a1)
+    dins    t0, t2, 16, 16
     addiu   a0, a0, 0x10
+    dins    t1, t5, 48, 16
+    dins    t1, t4, 32, 16
+    dins    t1, t3, 16, 16
+    .set    arch=loongson3a
     addiu   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_2_loop
-    lwl     t2, 0xf(a1)
+    lhu     t4, 0xe(a1)
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
