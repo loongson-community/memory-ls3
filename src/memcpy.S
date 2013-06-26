@@ -82,25 +82,25 @@ memcpy:
     subu    t8, t8, t4
 
 _memcpy_less:
+    sll     t0, a2, 0x3
     addu    a0, a0, a2
+    subu    t0, t8, t0
     addu    a1, a1, a2
-    sll     a2, a2, 0x3
-    subu    t0, t8, a2
     jr      t0
     or      t7, ra, zero
 
 _memcpy_have_16:
     /* index (bit 3) */
     sltiu   t4, t1, 0x1
+    addu    a3, a1, a2
     sll     t2, t4, 0x3
+    andi    a2, a2, 0xf
     /* calculate the entry address by index */
     or      t6, t7, t2
-    sll     t6, t6, 0x2
     addiu   t2, jp, _memcpy_loop_entries-memcpy
-    gslwx   t7, 0x0(t2, t6)
-    addu    a3, a1, a2
-    andi    a2, a2, 0xf
+    sll     t6, t6, 0x2
     subu    a3, a3, a2
+    gslwx   t7, 0x0(t2, t6)
     sll     t2, a2, 0x3
     jr      t7
     subu    t8, t8, t2
