@@ -138,12 +138,12 @@ _memcpy_16_4_loop:
     lwu     t0, 0x8(a1)
     lwu     t3, 0x4(a1)
     lwu     t1, 0x0(a1)
+    addiu   a0, a0, 0x10
     .set    arch=mips64r2
     dins    t0, t2, 32, 32
     dins    t1, t3, 32, 32
     .set    arch=loongson3a
     addiu   a1, a1, 0x10
-    addiu   a0, a0, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_4_loop
     lwu     t2, 0xc(a1)
