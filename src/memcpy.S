@@ -47,24 +47,24 @@ memcpy:
     /* index (bit 2-0) */
     subu    t2, t0, t1
     ori     t2, t2, 0x10
-    subu    t5, zero, t2
-    and     t2, t2, t5
-    ori     t5, zero, 0x1f
+    subu    ta1, zero, t2
+    and     t2, t2, ta1
+    ori     ta1, zero, 0x1f
     clz     t2, t2
     /* if have 16-byte aligned address */
     sll     t3, t0, t1
     beq     t3, t0, _memcpy_have_16
-    subu    t7, t5, t2
+    subu    ta3, ta1, t2
     /* index (bit 3) */
-    sltu    t4, t0, t1
-    sll     t2, t4, 0x3
+    sltu    ta0, t0, t1
+    sll     t2, ta0, 0x3
     /* calculate the entry address by index */
-    or      t6, t7, t2
-    sll     t6, t6, 0x2
+    or      ta2, ta3, t2
+    sll     ta2, ta2, 0x2
     addiu   t2, jp, _memcpy_loop_entries-memcpy
-    gslwx   t7, 0x0(t2, t6)
+    gslwx   ta3, 0x0(t2, ta2)
     /* head padding */
-    movz    t1, t0, t4
+    movz    t1, t0, ta0
     ori     t3, zero, 0x10
     subu    t3, t3, t1
     /* calculate s1, s2, n (16-byte aligned) */
@@ -76,10 +76,10 @@ memcpy:
     addu    a3, a1, t2
     /* goto head padding copies */
     sll     t3, t3, 0x3
-    sll     t4, a2, 0x3
-    subu    t6, t8, t3
-    jr      t6
-    subu    t8, t8, t4
+    sll     ta0, a2, 0x3
+    subu    ta2, t8, t3
+    jr      ta2
+    subu    t8, t8, ta0
 
 _memcpy_less:
     sll     t0, a2, 0x3
@@ -87,22 +87,22 @@ _memcpy_less:
     subu    t0, t8, t0
     addu    a1, a1, a2
     jr      t0
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_have_16:
     /* index (bit 3) */
-    sltiu   t4, t1, 0x1
+    sltiu   ta0, t1, 0x1
     addu    a3, a1, a2
-    sll     t2, t4, 0x3
+    sll     t2, ta0, 0x3
     andi    a2, a2, 0xf
     /* calculate the entry address by index */
-    or      t6, t7, t2
+    or      ta2, ta3, t2
     addiu   t2, jp, _memcpy_loop_entries-memcpy
-    sll     t6, t6, 0x2
+    sll     ta2, ta2, 0x2
     subu    a3, a3, a2
-    gslwx   t7, 0x0(t2, t6)
+    gslwx   ta3, 0x0(t2, ta2)
     sll     t2, a2, 0x3
-    jr      t7
+    jr      ta3
     subu    t8, t8, t2
 
 _memcpy_16_16:
@@ -116,7 +116,7 @@ _memcpy_16_16_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_16_8:
     ld      t0, 0x8(a1)
@@ -130,7 +130,7 @@ _memcpy_16_8_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_16_4:
     lwu     t2, 0xc(a1)
@@ -150,7 +150,7 @@ _memcpy_16_4_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_16_2:
     lwl     t3, 0xf(a1)
@@ -174,7 +174,7 @@ _memcpy_16_2_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_16_1:
     lbu     t0, 0x8(a1)
@@ -218,7 +218,7 @@ _memcpy_16_1_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_8_16:
     gslq    t0, t1, 0x0(a1)
@@ -232,7 +232,7 @@ _memcpy_8_16_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_4_16:
     gslq    t0, t1, 0x0(a1)
@@ -248,7 +248,7 @@ _memcpy_4_16_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_2_16:
     gslq    t0, t1, 0x0(a1)
@@ -270,7 +270,7 @@ _memcpy_2_16_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_1_16:
     gslq    t0, t1, 0x0(a1)
@@ -312,7 +312,7 @@ _memcpy_1_16_loop:
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
-    or      t7, ra, zero
+    or      ta3, ra, zero
 
 _memcpy_1_1:
     lbu     t2, -0x1f(a1)
@@ -321,12 +321,12 @@ _memcpy_1_1:
     sb      t1, -0x1e(a0)
     lbu     t0, -0x1d(a1)
     sb      t0, -0x1d(a0)
-    lbu     t6, -0x1c(a1)
-    sb      t6, -0x1c(a0)
-    lbu     t5, -0x1b(a1)
-    sb      t5, -0x1b(a0)
-    lbu     t4, -0x1a(a1)
-    sb      t4, -0x1a(a0)
+    lbu     ta2, -0x1c(a1)
+    sb      ta2, -0x1c(a0)
+    lbu     ta1, -0x1b(a1)
+    sb      ta1, -0x1b(a0)
+    lbu     ta0, -0x1a(a1)
+    sb      ta0, -0x1a(a0)
     lbu     t3, -0x19(a1)
     sb      t3, -0x19(a0)
     lbu     t2, -0x18(a1)
@@ -335,12 +335,12 @@ _memcpy_1_1:
     sb      t1, -0x17(a0)
     lbu     t0, -0x16(a1)
     sb      t0, -0x16(a0)
-    lbu     t6, -0x15(a1)
-    sb      t6, -0x15(a0)
-    lbu     t5, -0x14(a1)
-    sb      t5, -0x14(a0)
-    lbu     t4, -0x13(a1)
-    sb      t4, -0x13(a0)
+    lbu     ta2, -0x15(a1)
+    sb      ta2, -0x15(a0)
+    lbu     ta1, -0x14(a1)
+    sb      ta1, -0x14(a0)
+    lbu     ta0, -0x13(a1)
+    sb      ta0, -0x13(a0)
     lbu     t3, -0x12(a1)
     sb      t3, -0x12(a0)
     lbu     t2, -0x11(a1)
@@ -349,12 +349,12 @@ _memcpy_1_1:
     sb      t1, -0x10(a0)
     lbu     t0, -0x0f(a1)
     sb      t0, -0x0f(a0)
-    lbu     t6, -0x0e(a1)
-    sb      t6, -0x0e(a0)
-    lbu     t5, -0x0d(a1)
-    sb      t5, -0x0d(a0)
-    lbu     t4, -0x0c(a1)
-    sb      t4, -0x0c(a0)
+    lbu     ta2, -0x0e(a1)
+    sb      ta2, -0x0e(a0)
+    lbu     ta1, -0x0d(a1)
+    sb      ta1, -0x0d(a0)
+    lbu     ta0, -0x0c(a1)
+    sb      ta0, -0x0c(a0)
     lbu     t3, -0x0b(a1)
     sb      t3, -0x0b(a0)
     lbu     t2, -0x0a(a1)
@@ -363,12 +363,12 @@ _memcpy_1_1:
     sb      t1, -0x09(a0)
     lbu     t0, -0x08(a1)
     sb      t0, -0x08(a0)
-    lbu     t6, -0x07(a1)
-    sb      t6, -0x07(a0)
-    lbu     t5, -0x06(a1)
-    sb      t5, -0x06(a0)
-    lbu     t4, -0x05(a1)
-    sb      t4, -0x05(a0)
+    lbu     ta2, -0x07(a1)
+    sb      ta2, -0x07(a0)
+    lbu     ta1, -0x06(a1)
+    sb      ta1, -0x06(a0)
+    lbu     ta0, -0x05(a1)
+    sb      ta0, -0x05(a0)
     lbu     t3, -0x04(a1)
     sb      t3, -0x04(a0)
     lbu     t2, -0x03(a1)
@@ -378,7 +378,7 @@ _memcpy_1_1:
     lbu     t0, -0x01(a1)
     sb      t0, -0x01(a0)
 _memcpy_1_1_base:
-    jr      t7
+    jr      ta3
     nop
 
     .end    memcpy
