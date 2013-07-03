@@ -2,9 +2,9 @@
  ============================================================================
  Name        : memcpy.S
  Author      : Heiher <admin@heiher.info>
- Version     : 0.0.1
+ Version     : 0.0.2
  Copyright   : Copyright (c) 2013 everyone.
- Description : 
+ Description : memcpy for Loongson 3.
  ============================================================================
  */
 
