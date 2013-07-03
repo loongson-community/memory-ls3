@@ -10,6 +10,10 @@
 
 #include <sys/regdef.h>
 
+#define _MEMCPY_ALIGN_SPACE(a, b) \
+    .space  0x80-(_memcpy_less_##b##_base-_memcpy_less_##b)- \
+                 (.-_memcpy_less_##a##_base)
+
 /* void * memcpy (void *s1, const void *s2, size_t n); */
     .text    
     .align  2
@@ -37,9 +41,9 @@ _memcpy_loop_entries:
     .set    arch=loongson3a
 
 memcpy:
-    /* if less then 0x1f bytes */
-    sltiu   t2, a2, 0x1f
-    addiu   t8, jp, _memcpy_less_base-memcpy
+    /* if less then 0x36 bytes */
+    sltiu   t2, a2, 0x36
+    addiu   t8, jp, _memcpy_less_0_base-memcpy
     bnez    t2, _memcpy_less
     or      v0, a0, zero
     andi    t0, a0, 0xf
@@ -215,6 +219,18 @@ _memcpy_4_2_1_16_loop:
     or      ta3, ra, zero
 
 _memcpy_less_0:
+    ldl     t0, -0x29(a1)
+    ldr     t0, -0x30(a1)
+    sdl     t0, -0x29(a0)
+    sdr     t0, -0x30(a0)
+    gsldlc1 $f8, -0x21(a1)
+    gsldrc1 $f8, -0x28(a1)
+    gssdlc1 $f8, -0x21(a0)
+    gssdrc1 $f8, -0x28(a0)
+    ldl     ta2, -0x19(a1)
+    ldr     ta2, -0x20(a1)
+    sdl     ta2, -0x19(a0)
+    sdr     ta2, -0x20(a0)
     gsldlc1 $f6, -0x11(a1)
     gsldrc1 $f6, -0x18(a1)
     gssdlc1 $f6, -0x11(a0)
@@ -227,12 +243,24 @@ _memcpy_less_0:
     gsldrc1 $f4, -0x08(a1)
     gssdlc1 $f4, -0x01(a0)
     gssdrc1 $f4, -0x08(a0)
-_memcpy_less_base:
+_memcpy_less_0_base:
     jr      ta3
     nop
-    .space  0x80-(.-_memcpy_less_0)
 
+    _MEMCPY_ALIGN_SPACE(0, 1)
 _memcpy_less_1:
+    ldl     t1, -0x2a(a1)
+    ldr     t1, -0x31(a1)
+    sdl     t1, -0x2a(a0)
+    sdr     t1, -0x31(a0)
+    gsldlc1 $f8, -0x22(a1)
+    gsldrc1 $f8, -0x29(a1)
+    gssdlc1 $f8, -0x22(a0)
+    gssdrc1 $f8, -0x29(a0)
+    ldl     t0, -0x1a(a1)
+    ldr     t0, -0x21(a1)
+    sdl     t0, -0x1a(a0)
+    sdr     t0, -0x21(a0)
     gsldlc1 $f6, -0x12(a1)
     gsldrc1 $f6, -0x19(a1)
     gssdlc1 $f6, -0x12(a0)
@@ -245,12 +273,25 @@ _memcpy_less_1:
     gsldrc1 $f4, -0x09(a1)
     gssdlc1 $f4, -0x02(a0)
     gssdrc1 $f4, -0x09(a0)
+_memcpy_less_1_base:
     lbu     ta0, -0x01(a1)
     jr      ta3
     sb      ta0, -0x01(a0)
-    .space  0x80-(.-_memcpy_less_1)
 
+    _MEMCPY_ALIGN_SPACE(1, 2)
 _memcpy_less_2:
+    ldl     t1, -0x2b(a1)
+    ldr     t1, -0x32(a1)
+    sdl     t1, -0x2b(a0)
+    sdr     t1, -0x32(a0)
+    gsldlc1 $f8, -0x23(a1)
+    gsldrc1 $f8, -0x2a(a1)
+    gssdlc1 $f8, -0x23(a0)
+    gssdrc1 $f8, -0x2a(a0)
+    ldl     t0, -0x1b(a1)
+    ldr     t0, -0x22(a1)
+    sdl     t0, -0x1b(a0)
+    sdr     t0, -0x22(a0)
     gsldlc1 $f6, -0x13(a1)
     gsldrc1 $f6, -0x1a(a1)
     gssdlc1 $f6, -0x13(a0)
@@ -263,14 +304,27 @@ _memcpy_less_2:
     gsldrc1 $f4, -0x0a(a1)
     gssdlc1 $f4, -0x03(a0)
     gssdrc1 $f4, -0x0a(a0)
+_memcpy_less_2_base:
     lbu     ta1, -0x02(a1)
     sb      ta1, -0x02(a0)
     lbu     ta0, -0x01(a1)
     jr      ta3
     sb      ta0, -0x01(a0)
-    .space  0x80-(.-_memcpy_less_2)
 
+    _MEMCPY_ALIGN_SPACE(2, 3)
 _memcpy_less_3:
+    ldl     t1, -0x2c(a1)
+    ldr     t1, -0x33(a1)
+    sdl     t1, -0x2c(a0)
+    sdr     t1, -0x33(a0)
+    gsldlc1 $f8, -0x24(a1)
+    gsldrc1 $f8, -0x2b(a1)
+    gssdlc1 $f8, -0x24(a0)
+    gssdrc1 $f8, -0x2b(a0)
+    ldl     t0, -0x1c(a1)
+    ldr     t0, -0x23(a1)
+    sdl     t0, -0x1c(a0)
+    sdr     t0, -0x23(a0)
     gsldlc1 $f6, -0x14(a1)
     gsldrc1 $f6, -0x1b(a1)
     gssdlc1 $f6, -0x14(a0)
@@ -283,6 +337,7 @@ _memcpy_less_3:
     gsldrc1 $f4, -0x0b(a1)
     gssdlc1 $f4, -0x04(a0)
     gssdrc1 $f4, -0x0b(a0)
+_memcpy_less_3_base:
     lbu     ta1, -0x03(a1)
     sb      ta1, -0x03(a0)
     lbu     ta1, -0x02(a1)
@@ -290,9 +345,21 @@ _memcpy_less_3:
     lbu     ta0, -0x01(a1)
     jr      ta3
     sb      ta0, -0x01(a0)
-    .space  0x80-(.-_memcpy_less_3)
 
+    _MEMCPY_ALIGN_SPACE(3, 4)
 _memcpy_less_4:
+    gsldlc1 $f10, -0x2d(a1)
+    gsldrc1 $f10, -0x34(a1)
+    gssdlc1 $f10, -0x2d(a0)
+    gssdrc1 $f10, -0x34(a0)
+    ldl     ta2, -0x25(a1)
+    ldr     ta2, -0x2c(a1)
+    sdl     ta2, -0x25(a0)
+    sdr     ta2, -0x2c(a0)
+    gsldlc1 $f8, -0x1d(a1)
+    gsldrc1 $f8, -0x24(a1)
+    gssdlc1 $f8, -0x1d(a0)
+    gssdrc1 $f8, -0x24(a0)
     ldl     ta1, -0x15(a1)
     ldr     ta1, -0x1c(a1)
     sdl     ta1, -0x15(a0)
@@ -305,14 +372,27 @@ _memcpy_less_4:
     ldr     ta0, -0x0c(a1)
     sdl     ta0, -0x05(a0)
     sdr     ta0, -0x0c(a0)
+_memcpy_less_4_base:
     gslwlc1 $f4, -0x1(a1)
     gslwrc1 $f4, -0x4(a1)
     gsswlc1 $f4, -0x1(a0)
     jr      ta3
     gsswrc1 $f4, -0x4(a0)
-    .space  0x80-(.-_memcpy_less_4)
 
+    _MEMCPY_ALIGN_SPACE(4, 5)
 _memcpy_less_5:
+    gsldlc1 $f10, -0x2e(a1)
+    gsldrc1 $f10, -0x35(a1)
+    gssdlc1 $f10, -0x2e(a0)
+    gssdrc1 $f10, -0x35(a0)
+    ldl     t0, -0x26(a1)
+    ldr     t0, -0x2d(a1)
+    sdl     t0, -0x26(a0)
+    sdr     t0, -0x2d(a0)
+    gsldlc1 $f8, -0x1e(a1)
+    gsldrc1 $f8, -0x25(a1)
+    gssdlc1 $f8, -0x1e(a0)
+    gssdrc1 $f8, -0x25(a0)
     ldl     ta2, -0x16(a1)
     ldr     ta2, -0x1d(a1)
     sdl     ta2, -0x16(a0)
@@ -325,6 +405,7 @@ _memcpy_less_5:
     ldr     ta1, -0x0d(a1)
     sdl     ta1, -0x06(a0)
     sdr     ta1, -0x0d(a0)
+_memcpy_less_5_base:
     gslwlc1 $f4, -0x2(a1)
     gslwrc1 $f4, -0x5(a1)
     gsswlc1 $f4, -0x2(a0)
@@ -332,9 +413,17 @@ _memcpy_less_5:
     lbu     ta0, -0x1(a1)
     jr      ta3
     sb      ta0, -0x1(a0)
-    .space  0x80-(.-_memcpy_less_5)
 
+    _MEMCPY_ALIGN_SPACE(5, 6)
 _memcpy_less_6:
+    ldl     t1, -0x27(a1)
+    ldr     t1, -0x2e(a1)
+    sdl     t1, -0x27(a0)
+    sdr     t1, -0x2e(a0)
+    gsldlc1 $f8, -0x1f(a1)
+    gsldrc1 $f8, -0x26(a1)
+    gssdlc1 $f8, -0x1f(a0)
+    gssdrc1 $f8, -0x26(a0)
     ldl     t0, -0x17(a1)
     ldr     t0, -0x1e(a1)
     sdl     t0, -0x17(a0)
@@ -347,6 +436,7 @@ _memcpy_less_6:
     ldr     ta2, -0x0e(a1)
     sdl     ta2, -0x07(a0)
     sdr     ta2, -0x0e(a0)
+_memcpy_less_6_base:
     gslwlc1 $f4, -0x3(a1)
     gslwrc1 $f4, -0x6(a1)
     gsswlc1 $f4, -0x3(a0)
@@ -356,9 +446,17 @@ _memcpy_less_6:
     lbu     ta0, -0x1(a1)
     jr      ta3
     sb      ta0, -0x1(a0)
-    .space  0x80-(.-_memcpy_less_6)
 
+    _MEMCPY_ALIGN_SPACE(6, 7)
 _memcpy_less_7:
+    ldl     t3, -0x28(a1)
+    ldr     t3, -0x2f(a1)
+    sdl     t3, -0x28(a0)
+    sdr     t3, -0x2f(a0)
+    gsldlc1 $f8, -0x20(a1)
+    gsldrc1 $f8, -0x27(a1)
+    gssdlc1 $f8, -0x20(a0)
+    gssdrc1 $f8, -0x27(a0)
     ldl     t2, -0x18(a1)
     ldr     t2, -0x1f(a1)
     sdl     t2, -0x18(a0)
@@ -371,6 +469,7 @@ _memcpy_less_7:
     ldr     t0, -0x0f(a1)
     sdl     t0, -0x08(a0)
     sdr     t0, -0x0f(a0)
+_memcpy_less_7_base:
     gslwlc1 $f4, -0x4(a1)
     gslwrc1 $f4, -0x7(a1)
     gsswlc1 $f4, -0x4(a0)
@@ -382,7 +481,6 @@ _memcpy_less_7:
     lbu     ta0, -0x1(a1)
     jr      ta3
     sb      ta0, -0x1(a0)
-    .space  0x80-(.-_memcpy_less_7)
 
     .end    memcpy
     .set    pop
