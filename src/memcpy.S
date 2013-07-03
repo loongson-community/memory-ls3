@@ -17,15 +17,15 @@
     .type   _memcpy_loop_entries, @object
     .size   _memcpy_loop_entries, 52
 _memcpy_loop_entries:
-    .word   _memcpy_16_1
-    .word   _memcpy_16_2
+    .word   _memcpy_16_1_2
+    .word   _memcpy_16_1_2
     .word   _memcpy_16_4
     .word   _memcpy_16_8
     .word   _memcpy_16_16
     .space  12
-    .word   _memcpy_1_16
-    .word   _memcpy_2_16
-    .word   _memcpy_4_16
+    .word   _memcpy_4_2_1_16
+    .word   _memcpy_4_2_1_16
+    .word   _memcpy_4_2_1_16
     .word   _memcpy_8_16
     .word   _memcpy_16_16
 
@@ -168,69 +168,17 @@ _memcpy_16_4_loop:
     jr      t8
     or      ta3, ra, zero
 
-_memcpy_16_2:
-    lwl     t3, 0xf(a1)
-_memcpy_16_2_loop:
-    lwr     t3, 0xc(a1)
-    lwl     t0, 0xb(a1)
-    lwr     t0, 0x8(a1)
-    .set    arch=mips64r2
-    lwl     t2, 0x7(a1)
-    lwr     t2, 0x4(a1)
-    lwl     t1, 0x3(a1)
-    lwr     t1, 0x0(a1)
-    addiu   a0, a0, 0x10
-    dins    t0, t3, 32, 32
-    dins    t1, t2, 32, 32
-    .set    arch=loongson3a
-    addiu   a1, a1, 0x10
-    gssq    t0, t1, -0x10(a0)
-    bnel    a1, a3, _memcpy_16_2_loop
-    lwl     t3, 0xf(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
-    jr      t8
-    or      ta3, ra, zero
-
-_memcpy_16_1:
-    lbu     t0, 0x8(a1)
-_memcpy_16_1_loop:
-    lbu     t2, 0x9(a1)
-    .set    arch=mips64r2
-    dins    t0, t2, 8, 8
-    lbu     t2, 0xa(a1)
-    dins    t0, t2, 16, 8
-    lbu     t2, 0xb(a1)
-    dins    t0, t2, 24, 8
-    lbu     t2, 0xc(a1)
-    dins    t0, t2, 32, 8
-    lbu     t2, 0xd(a1)
-    dins    t0, t2, 40, 8
-    lbu     t2, 0xe(a1)
-    dins    t0, t2, 48, 8
-    lbu     t2, 0xf(a1)
-    dins    t0, t2, 56, 8
-    lbu     t1, 0x0(a1)
-    lbu     t2, 0x1(a1)
-    dins    t1, t2, 8, 8
-    lbu     t2, 0x2(a1)
-    dins    t1, t2, 16, 8
-    lbu     t2, 0x3(a1)
-    dins    t1, t2, 24, 8
-    lbu     t2, 0x4(a1)
-    dins    t1, t2, 32, 8
-    lbu     t2, 0x5(a1)
-    dinsu   t1, t2, 40, 8
-    lbu     t2, 0x6(a1)
-    dinsu   t1, t2, 48, 8
-    lbu     t2, 0x7(a1)
-    dinsu   t1, t2, 56, 8
-    .set    arch=loongson3a
+_memcpy_16_1_2:
+    ldl      t0, 0xf(a1)
+_memcpy_16_1_2_loop:
+    ldr      t0, 0x8(a1)
+    ldl      t1, 0x7(a1)
+    ldr      t1, 0x0(a1)
     addiu   a0, a0, 0x10
     addiu   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
-    bnel    a1, a3, _memcpy_16_1_loop
-    lbu     t0, 0x8(a1)
+    bnel    a1, a3, _memcpy_16_1_2_loop
+    ldl      t0, 0xf(a1)
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
@@ -250,80 +198,16 @@ _memcpy_8_16_loop:
     jr      t8
     or      ta3, ra, zero
 
-_memcpy_4_16:
+_memcpy_4_2_1_16:
     gslq    t0, t1, 0x0(a1)
-_memcpy_4_16_loop:
+_memcpy_4_2_1_16_loop:
     addiu   a0, a0, 0x10
     addiu   a1, a1, 0x10
     sdl     t1, -0x09(a0)
     sdr     t1, -0x10(a0)
     sdl     t0, -0x01(a0)
     sdr     t0, -0x08(a0)
-    bnel    a1, a3, _memcpy_4_16_loop
-    gslq    t0, t1, 0x0(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
-    jr      t8
-    or      ta3, ra, zero
-
-_memcpy_2_16:
-    gslq    t0, t1, 0x0(a1)
-_memcpy_2_16_loop:
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
-    swl     t1, -0x0d(a0)
-    swr     t1, -0x10(a0)
-    dsrl    t1, t1, 32
-    swl     t1, -0x09(a0)
-    swr     t1, -0x0c(a0)
-    swl     t0, -0x05(a0)
-    swr     t0, -0x08(a0)
-    dsrl    t0, t0, 32
-    swl     t0, -0x1(a0)
-    swr     t0, -0x4(a0)
-    bnel    a1, a3, _memcpy_2_16_loop
-    gslq    t0, t1, 0x0(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
-    jr      t8
-    or      ta3, ra, zero
-
-_memcpy_1_16:
-    gslq    t0, t1, 0x0(a1)
-_memcpy_1_16_loop:
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
-    sb      t1, -0x10(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x0f(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x0e(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x0d(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x0c(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x0b(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x0a(a0)
-    dsrl    t1, t1, 8
-    sb      t1, -0x09(a0)
-    sb      t0, -0x08(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x07(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x06(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x05(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x04(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x03(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x02(a0)
-    dsrl    t0, t0, 8
-    sb      t0, -0x01(a0)
-    bnel    a1, a3, _memcpy_1_16_loop
+    bnel    a1, a3, _memcpy_4_2_1_16_loop
     gslq    t0, t1, 0x0(a1)
     addu    a0, a0, a2
     addu    a1, a1, a2
