@@ -173,16 +173,16 @@ _memcpy_16_4_loop:
     or      ta3, ra, zero
 
 _memcpy_16_1_2:
-    ldl      t0, 0xf(a1)
+    ldl     t0, 0xf(a1)
 _memcpy_16_1_2_loop:
-    ldr      t0, 0x8(a1)
-    ldl      t1, 0x7(a1)
-    ldr      t1, 0x0(a1)
+    ldr     t0, 0x8(a1)
+    ldl     t1, 0x7(a1)
+    ldr     t1, 0x0(a1)
     addiu   a0, a0, 0x10
     addiu   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_1_2_loop
-    ldl      t0, 0xf(a1)
+    ldl     t0, 0xf(a1)
     addu    a0, a0, a2
     addu    a1, a1, a2
     jr      t8
