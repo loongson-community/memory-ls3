@@ -61,10 +61,9 @@ memcpy:
     subu    ta3, ta1, t2
     /* index (bit 3) */
     sltu    ta0, t0, t1
-    sll     t2, ta0, 0x3
     /* calculate the entry address by index */
-    or      ta2, ta3, t2
-    sll     ta2, ta2, 0x2
+    ins     ta3, ta0, 0x3, 0x1
+    sll     ta2, ta3, 0x2
     addiu   t2, jp, _memcpy_loop_entries-memcpy
     gslwx   ta3, 0x0(t2, ta2)
     /* head padding */
