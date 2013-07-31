@@ -1,14 +1,45 @@
 /*
  ============================================================================
  Name        : memcpy.S
- Author      : Heiher <admin@heiher.info>
- Version     : 0.0.2
+ Author      : Heiher <root@heiher.info>
+               Chen Jie <chenj@lemote.com>
+ Version     : 1.0.0
  Copyright   : Copyright (c) 2013 everyone.
- Description : memcpy for Loongson 3.
+ Description : The memcpy for Loongson 3.
  ============================================================================
  */
 
 #include <sys/regdef.h>
+
+#if _MIPS_SIM == _ABI64
+
+#define ENTRY           .dword
+#define ENTRY_PADDING   .space   24
+#define ENTRIES_SIZE    104
+
+#define PTR_SHIFT       0x3
+
+#define ADDU            daddu
+#define ADDIU           daddiu
+#define SUBU            dsubu
+#define SLL             dsll
+#define LOADP           gsldx
+
+#else /* _ABIO32 || _ABIN32 */
+
+#define ENTRY           .word
+#define ENTRY_PADDING   .space   12
+#define ENTRIES_SIZE    52
+
+#define PTR_SHIFT       0x2
+
+#define ADDU            addu
+#define ADDIU           addiu
+#define SUBU            subu
+#define SLL             sll
+#define LOADP           gslwx
+
+#endif
 
 #define _MEMCPY_ALIGN_SPACE(a, b) \
     .space  0x80-(_memcpy_less_##b##_base-_memcpy_less_##b)- \
@@ -19,19 +50,19 @@
     .align  2
 
     .type   _memcpy_loop_entries, @object
-    .size   _memcpy_loop_entries, 52
+    .size   _memcpy_loop_entries, ENTRIES_SIZE
 _memcpy_loop_entries:
-    .word   _memcpy_16_1_2
-    .word   _memcpy_16_1_2
-    .word   _memcpy_16_4
-    .word   _memcpy_16_8
-    .word   _memcpy_16_16
-    .space  12
-    .word   _memcpy_4_2_1_16
-    .word   _memcpy_4_2_1_16
-    .word   _memcpy_4_2_1_16
-    .word   _memcpy_8_16
-    .word   _memcpy_16_16
+    ENTRY   _memcpy_16_1_2
+    ENTRY   _memcpy_16_1_2
+    ENTRY   _memcpy_16_4
+    ENTRY   _memcpy_16_8
+    ENTRY   _memcpy_16_16
+    ENTRY_PADDING
+    ENTRY   _memcpy_4_2_1_16
+    ENTRY   _memcpy_4_2_1_16
+    ENTRY   _memcpy_4_2_1_16
+    ENTRY   _memcpy_8_16
+    ENTRY   _memcpy_16_16
 
     .globl  memcpy
     .ent    memcpy, 0
@@ -43,7 +74,7 @@ _memcpy_loop_entries:
 memcpy:
     /* if less then 0x36 bytes */
     sltiu   t2, a2, 0x36
-    addiu   t8, jp, _memcpy_less_0_base-memcpy
+    ADDIU   t8, jp, _memcpy_less_0_base-memcpy
     bnez    t2, _memcpy_less
     or      v0, a0, zero
     andi    t0, a0, 0xf
@@ -63,77 +94,77 @@ memcpy:
     sltu    ta0, t0, t1
     /* calculate the entry address by index */
     ins     ta3, ta0, 0x3, 0x1
-    sll     ta2, ta3, 0x2
-    addiu   t2, jp, _memcpy_loop_entries-memcpy
-    gslwx   ta3, 0x0(t2, ta2)
+    sll     ta2, ta3, PTR_SHIFT
+    ADDIU   t2, jp, _memcpy_loop_entries-memcpy
+    LOADP   ta3, 0x0(t2, ta2)
     /* head padding */
     movz    t1, t0, ta0
     ori     t3, zero, 0x10
     subu    t3, t3, t1
     /* calculate s1, s2, n (16-byte aligned) */
-    addu    a0, a0, t3
-    addu    a1, a1, t3
-    subu    t2, a2, t3
+    ADDU    a0, a0, t3
+    ADDU    a1, a1, t3
+    SUBU    t2, a2, t3
     andi    a2, t2, 0xf
-    subu    t2, t2, a2
-    addu    a3, a1, t2
+    SUBU    t2, t2, a2
+    ADDU    a3, a1, t2
     /* goto head padding copies */
     andi    t0, t3, 0x7
     sll     t1, t0, 0x7
     subu    t2, t3, t0
     sll     t2, t2, 0x1
-    addu    t0, t8, t1
-    subu    ta0, t0, t2
+    ADDU    t0, t8, t1
+    SUBU    ta0, t0, t2
     andi    t0, a2, 0x7
-    sll     t1, t0, 0x7
-    subu    t2, a2, t0
-    sll     t2, t2, 0x1
-    addu    t0, t8, t1
+    SLL     t1, t0, 0x7
+    SUBU    t2, a2, t0
+    SLL     t2, t2, 0x1
+    ADDU    t0, t8, t1
     jr      ta0
-    subu    t8, t0, t2
+    SUBU    t8, t0, t2
 
 _memcpy_less:
     andi    t0, a2, 0x7
-    addu    a0, a0, a2
-    sll     t1, t0, 0x7
-    subu    t2, a2, t0
-    addu    a1, a1, a2
-    sll     t2, t2, 0x1
-    addu    t0, t8, t1
-    subu    t0, t0, t2
+    ADDU    a0, a0, a2
+    SLL     t1, t0, 0x7
+    SUBU    t2, a2, t0
+    ADDU    a1, a1, a2
+    SLL     t2, t2, 0x1
+    ADDU    t0, t8, t1
+    SUBU    t0, t0, t2
     jr      t0
     or      ta3, ra, zero
 
 _memcpy_have_16:
     /* index (bit 3) */
     sltiu   ta0, t1, 0x1
-    addu    a3, a1, a2
+    ADDU    a3, a1, a2
     sll     t2, ta0, 0x3
     andi    a2, a2, 0xf
     /* calculate the entry address by index */
     or      ta2, ta3, t2
-    addiu   t2, jp, _memcpy_loop_entries-memcpy
-    sll     ta2, ta2, 0x2
-    subu    a3, a3, a2
-    gslwx   ta3, 0x0(t2, ta2)
+    ADDIU   t2, jp, _memcpy_loop_entries-memcpy
+    sll     ta2, ta2, PTR_SHIFT
+    SUBU    a3, a3, a2
+    LOADP   ta3, 0x0(t2, ta2)
     andi    t0, a2, 0x7
-    sll     t1, t0, 0x7
-    subu    t2, a2, t0
-    sll     t2, t2, 0x1
-    addu    t0, t8, t1
+    SLL     t1, t0, 0x7
+    SUBU    t2, a2, t0
+    SLL     t2, t2, 0x1
+    ADDU    t0, t8, t1
     jr      ta3
-    subu    t8, t0, t2
+    SUBU    t8, t0, t2
 
 _memcpy_16_16:
     gslq    t0, t1, 0x0(a1)
 _memcpy_16_16_loop:
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
+    ADDIU   a0, a0, 0x10
+    ADDIU   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_16_loop
     gslq    t0, t1, 0x0(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
+    ADDU    a0, a0, a2
+    ADDU    a1, a1, a2
     jr      t8
     or      ta3, ra, zero
 
@@ -141,13 +172,13 @@ _memcpy_16_8:
     ld      t0, 0x8(a1)
 _memcpy_16_8_loop:
     ld      t1, 0x0(a1)
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
+    ADDIU   a0, a0, 0x10
+    ADDIU   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_8_loop
     ld      t0, 0x8(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
+    ADDU    a0, a0, a2
+    ADDU    a1, a1, a2
     jr      t8
     or      ta3, ra, zero
 
@@ -157,17 +188,17 @@ _memcpy_16_4_loop:
     lwu     t0, 0x8(a1)
     lwu     t3, 0x4(a1)
     lwu     t1, 0x0(a1)
-    addiu   a0, a0, 0x10
+    ADDIU   a0, a0, 0x10
     .set    arch=mips64r2
     dins    t0, t2, 32, 32
     dins    t1, t3, 32, 32
     .set    arch=loongson3a
-    addiu   a1, a1, 0x10
+    ADDIU   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_4_loop
     lwu     t2, 0xc(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
+    ADDU    a0, a0, a2
+    ADDU    a1, a1, a2
     jr      t8
     or      ta3, ra, zero
 
@@ -177,43 +208,43 @@ _memcpy_16_1_2_loop:
     ldr     t0, 0x8(a1)
     ldl     t1, 0x7(a1)
     ldr     t1, 0x0(a1)
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
+    ADDIU   a0, a0, 0x10
+    ADDIU   a1, a1, 0x10
     gssq    t0, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_1_2_loop
     ldl     t0, 0xf(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
+    ADDU    a0, a0, a2
+    ADDU    a1, a1, a2
     jr      t8
     or      ta3, ra, zero
 
 _memcpy_8_16:
     gslq    t0, t1, 0x0(a1)
 _memcpy_8_16_loop:
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
+    ADDIU   a0, a0, 0x10
+    ADDIU   a1, a1, 0x10
     sd      t0, -0x08(a0)
     sd      t1, -0x10(a0)
     bnel    a1, a3, _memcpy_8_16_loop
     gslq    t0, t1, 0x0(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
+    ADDU    a0, a0, a2
+    ADDU    a1, a1, a2
     jr      t8
     or      ta3, ra, zero
 
 _memcpy_4_2_1_16:
     gslq    t0, t1, 0x0(a1)
 _memcpy_4_2_1_16_loop:
-    addiu   a0, a0, 0x10
-    addiu   a1, a1, 0x10
+    ADDIU   a0, a0, 0x10
+    ADDIU   a1, a1, 0x10
     sdl     t1, -0x09(a0)
     sdr     t1, -0x10(a0)
     sdl     t0, -0x01(a0)
     sdr     t0, -0x08(a0)
     bnel    a1, a3, _memcpy_4_2_1_16_loop
     gslq    t0, t1, 0x0(a1)
-    addu    a0, a0, a2
-    addu    a1, a1, a2
+    ADDU    a0, a0, a2
+    ADDU    a1, a1, a2
     jr      t8
     or      ta3, ra, zero
 
