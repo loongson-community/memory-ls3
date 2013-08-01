@@ -139,12 +139,11 @@ _memcpy_have_16:
     /* index (bit 3) */
     sltiu   ta0, t1, 0x1
     ADDU    a3, a1, a2
-    sll     t2, ta0, 0x3
     andi    a2, a2, 0xf
     /* calculate the entry address by index */
-    or      ta2, ta3, t2
+    ins     ta3, ta0, 0x3, 0x1
     ADDIU   t2, jp, _memcpy_loop_entries-memcpy
-    sll     ta2, ta2, PTR_SHIFT
+    sll     ta2, ta3, PTR_SHIFT
     SUBU    a3, a3, a2
     LOADP   ta3, 0x0(t2, ta2)
     andi    t0, a2, 0x7
