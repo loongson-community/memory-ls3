@@ -100,7 +100,9 @@ memcpy:
     /* index (bit 3) */
     sltu    ta0, t0, t1
     /* calculate the entry address by index */
+    .set    arch=mips64r2
     ins     ta3, ta0, 0x3, 0x1
+    .set    arch=loongson3a
     sll     ta2, ta3, PTR_SHIFT
     ADDIU   t2, jp, _memcpy_loop_entries-memcpy
     LOADP   ta3, 0x0(t2, ta2)
@@ -148,7 +150,9 @@ _memcpy_have_16:
     ADDU    a3, a1, a2
     andi    a2, a2, 0xf
     /* calculate the entry address by index */
+    .set    arch=mips64r2
     ins     ta3, ta0, 0x3, 0x1
+    .set    arch=loongson3a
     ADDIU   t2, jp, _memcpy_loop_entries-memcpy
     sll     ta2, ta3, PTR_SHIFT
     SUBU    a3, a3, a2
