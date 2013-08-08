@@ -3,21 +3,23 @@
  Name        : memcpy.S
  Author      : Heiher <root@heiher.info>
                Chen Jie <chenj@lemote.com>
- Version     : 1.1.0
+ Version     : 1.2.0
  Copyright   : Copyright (c) 2013 everyone.
  Description : The memcpy for Loongson 3.
  ============================================================================
  */
 
+#include <sys/asm.h>
 #include <sys/regdef.h>
+
+#define ENTRIES         10
+#define PADDING         3
+#define ENTRY_PADDING   .space   (PTRSIZE*PADDING)
+#define ENTRIES_SIZE    (PTRSIZE*(ENTRIES+PADDING))
 
 #if _MIPS_SIM == _ABI64
 
 #define ENTRY           .dword
-#define ENTRY_PADDING   .space   24
-#define ENTRIES_SIZE    104
-
-#define PTR_SHIFT       0x3
 
 #define ADDU            daddu
 #define ADDIU           daddiu
@@ -28,10 +30,6 @@
 #else /* _ABIO32 || _ABIN32 */
 
 #define ENTRY           .word
-#define ENTRY_PADDING   .space   12
-#define ENTRIES_SIZE    52
-
-#define PTR_SHIFT       0x2
 
 #define ADDU            addu
 #define ADDIU           addiu
@@ -103,7 +101,7 @@ memcpy:
     .set    arch=mips64r2
     ins     ta3, ta0, 0x3, 0x1
     .set    arch=loongson3a
-    sll     ta2, ta3, PTR_SHIFT
+    sll     ta2, ta3, PTRLOG
     ADDIU   t2, jp, _memcpy_loop_entries-memcpy
     LOADP   ta3, 0x0(t2, ta2)
     /* head padding */
@@ -154,7 +152,7 @@ _memcpy_have_16:
     ins     ta3, ta0, 0x3, 0x1
     .set    arch=loongson3a
     ADDIU   t2, jp, _memcpy_loop_entries-memcpy
-    sll     ta2, ta3, PTR_SHIFT
+    sll     ta2, ta3, PTRLOG
     SUBU    a3, a3, a2
     LOADP   ta3, 0x0(t2, ta2)
     andi    t0, a2, 0x7
@@ -173,8 +171,8 @@ _memcpy_16_16_loop:
     ADDIU   a1, a1, 0x20
     gssq    t0, t1, -0x20(a0)
 _memcpy_16_16_:
-    gslq    t2, t3, -0x10(a1)
-    gssq    t2, t3, -0x10(a0)
+    gslqc1  $f4, $f6, -0x10(a1)
+    gssqc1  $f4, $f6, -0x10(a0)
     bnel    a1, a3, _memcpy_16_16_loop
     gslq    t0, t1, 0x0(a1)
     ADDU    a0, a0, a2
@@ -191,9 +189,9 @@ _memcpy_16_8_loop:
     ADDIU   a1, a1, 0x20
     gssq    t0, t1, -0x20(a0)
 _memcpy_16_8_:
-    ld      t2, -0x08(a1)
-    ld      t3, -0x10(a1)
-    gssq    t2, t3, -0x10(a0)
+    ldc1    $f4, -0x08(a1)
+    ldc1    $f6, -0x10(a1)
+    gssqc1  $f4, $f6, -0x10(a0)
     bnel    a1, a3, _memcpy_16_8_loop
     ld      t0, 0x8(a1)
     ADDU    a0, a0, a2
@@ -210,8 +208,8 @@ _memcpy_16_4_loop:
     lwu     t1, 0x0(a1)
     ADDIU   a0, a0, 0x20
     .set    arch=mips64r2
-    dins    t0, t2, 32, 32
-    dins    t1, t3, 32, 32
+    dinsu   t0, t2, 32, 32
+    dinsu   t1, t3, 32, 32
     .set    arch=loongson3a
     ADDIU   a1, a1, 0x20
     gssq    t0, t1, -0x20(a0)
@@ -221,8 +219,8 @@ _memcpy_16_4_:
     lwu     t0, -0x0c(a1)
     lwu     t1, -0x10(a1)
     .set    arch=mips64r2
-    dins    t3, t2, 32, 32
-    dins    t1, t0, 32, 32
+    dinsu   t3, t2, 32, 32
+    dinsu   t1, t0, 32, 32
     .set    arch=loongson3a
     gssq    t3, t1, -0x10(a0)
     bnel    a1, a3, _memcpy_16_4_loop
@@ -243,11 +241,11 @@ _memcpy_16_1_2_loop:
     ADDIU   a1, a1, 0x20
     gssq    t0, t1, -0x20(a0)
 _memcpy_16_1_2_:
-    ldl     t2, -0x01(a1)
-    ldr     t2, -0x08(a1)
-    ldl     t3, -0x09(a1)
-    ldr     t3, -0x10(a1)
-    gssq    t2, t3, -0x10(a0)
+    gsldlc1 $f4, -0x01(a1)
+    gsldrc1 $f4, -0x08(a1)
+    gsldlc1 $f6, -0x09(a1)
+    gsldrc1 $f6, -0x10(a1)
+    gssqc1  $f4, $f6, -0x10(a0)
     bnel    a1, a3, _memcpy_16_1_2_loop
     ldl     t0, 0xf(a1)
     ADDU    a0, a0, a2
@@ -264,9 +262,9 @@ _memcpy_8_16_loop:
     sd      t0, -0x18(a0)
     sd      t1, -0x20(a0)
 _memcpy_8_16_:
-    gslq    t2, t3, -0x10(a1)
-    sd      t2, -0x08(a0)
-    sd      t3, -0x10(a0)
+    gslqc1  $f4, $f6, -0x10(a1)
+    sdc1    $f4, -0x08(a0)
+    sdc1    $f6, -0x10(a0)
     bnel    a1, a3, _memcpy_8_16_loop
     gslq    t0, t1, 0x0(a1)
     ADDU    a0, a0, a2
@@ -285,11 +283,11 @@ _memcpy_4_2_1_16_loop:
     sdl     t1, -0x19(a0)
     sdr     t1, -0x20(a0)
 _memcpy_4_2_1_16_:
-    gslq    t2, t3, -0x10(a1)
-    sdl     t2, -0x01(a0)
-    sdr     t2, -0x08(a0)
-    sdl     t3, -0x09(a0)
-    sdr     t3, -0x10(a0)
+    gslqc1  $f4, $f6, -0x10(a1)
+    gssdlc1 $f4, -0x01(a0)
+    gssdrc1 $f4, -0x08(a0)
+    gssdlc1 $f6, -0x09(a0)
+    gssdrc1 $f6, -0x10(a0)
     bnel    a1, a3, _memcpy_4_2_1_16_loop
     gslq    t0, t1, 0x0(a1)
     ADDU    a0, a0, a2
