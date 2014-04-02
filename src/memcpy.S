@@ -71,6 +71,7 @@ _memcpy_loop_entries:
 
     .globl  memcpy
     .ent    memcpy, 0
+    .type   memcpy, @function
     .set    push
     .set    noreorder    
     .set    noat
@@ -560,5 +561,6 @@ _memcpy_less_7_base:
     sb      ta0, -0x1(a0)
 
     .end    memcpy
+    .size   memcpy, .-memcpy
     .set    pop
 
