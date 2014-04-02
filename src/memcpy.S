@@ -54,21 +54,6 @@
     .text
     .align  2
 
-    .type   _memcpy_loop_entries, @object
-    .size   _memcpy_loop_entries, ENTRIES_SIZE
-_memcpy_loop_entries:
-    ENTRY   _memcpy_16_1_2
-    ENTRY   _memcpy_16_1_2
-    ENTRY   _memcpy_16_4
-    ENTRY   _memcpy_16_8
-    ENTRY   _memcpy_16_16
-    ENTRY_PADDING
-    ENTRY   _memcpy_4_2_1_16
-    ENTRY   _memcpy_4_2_1_16
-    ENTRY   _memcpy_4_2_1_16
-    ENTRY   _memcpy_8_16
-    ENTRY   _memcpy_16_16
-
     .globl  memcpy
     .ent    memcpy, 0
     .type   memcpy, @function
@@ -83,6 +68,11 @@ memcpy:
     ADDIU   t8, jp, _memcpy_less_0_base-memcpy
     bnez    t2, _memcpy_less
     or      v0, a0, zero
+    /* load the ptr of memcpy loop entries */
+    lui     ta3, %hi(%neg(%gp_rel(memcpy)))
+    ADDU    ta3, ta3, jp
+    ADDIU   ta3,ta3,%lo(%neg(%gp_rel(memcpy)))
+    PTR_L   jp, %got_disp(_memcpy_loop_entries)(ta3)
     andi    t0, a0, 0xf
     andi    t1, a1, 0xf
     /* index (bit 2-0) */
@@ -103,8 +93,7 @@ memcpy:
     ins     ta3, ta0, 0x3, 0x1
     .set    arch=loongson3a
     sll     ta2, ta3, PTRLOG
-    ADDIU   t2, jp, _memcpy_loop_entries-memcpy
-    LOADP   ta3, 0x0(t2, ta2)
+    LOADP   ta3, 0x0(jp, ta2)
     /* head padding */
     movz    t1, t0, ta0
     ori     t3, zero, 0x10
@@ -152,10 +141,9 @@ _memcpy_have_16:
     .set    arch=mips64r2
     ins     ta3, ta0, 0x3, 0x1
     .set    arch=loongson3a
-    ADDIU   t2, jp, _memcpy_loop_entries-memcpy
     sll     ta2, ta3, PTRLOG
     SUBU    a3, a3, a2
-    LOADP   ta3, 0x0(t2, ta2)
+    LOADP   ta3, 0x0(jp, ta2)
     andi    t0, a2, 0x7
     SLL     t1, t0, 0x7
     SUBU    t2, a2, t0
@@ -563,4 +551,23 @@ _memcpy_less_7_base:
     .end    memcpy
     .size   memcpy, .-memcpy
     .set    pop
+
+    .rdata
+    .align  2
+
+    .local  _memcpy_loop_entries
+    .type   _memcpy_loop_entries, @object
+    .size   _memcpy_loop_entries, ENTRIES_SIZE
+_memcpy_loop_entries:
+    ENTRY   _memcpy_16_1_2
+    ENTRY   _memcpy_16_1_2
+    ENTRY   _memcpy_16_4
+    ENTRY   _memcpy_16_8
+    ENTRY   _memcpy_16_16
+    ENTRY_PADDING
+    ENTRY   _memcpy_4_2_1_16
+    ENTRY   _memcpy_4_2_1_16
+    ENTRY   _memcpy_4_2_1_16
+    ENTRY   _memcpy_8_16
+    ENTRY   _memcpy_16_16
 
