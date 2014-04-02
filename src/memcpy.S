@@ -51,7 +51,7 @@
     ADDU    a1, a1, t0
 
 /* void * memcpy (void *s1, const void *s2, size_t n); */
-    .text    
+    .text
     .align  2
 
     .type   _memcpy_loop_entries, @object
