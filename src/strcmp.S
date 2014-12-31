@@ -13,6 +13,8 @@
 
 #define ADDIU   PTR_ADDIU
 
+/* WANRING: This program may be cause a memory access error(overflow). */
+
 /* int strcmp (const char *s1, const char *s2); */
 
     .globl  strcmp
