@@ -14,6 +14,8 @@
 #define ADDIU   PTR_ADDIU
 #define SUBU    PTR_SUBU
 
+/* WANRING: This program may be cause a memory access error(overflow). */
+
 /* size_t strlen(const char *s); */
 
     .globl  strlen
