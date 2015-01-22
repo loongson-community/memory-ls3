@@ -33,7 +33,7 @@ strlen:
     ori     t3, 0x8080
     dins    t2, t2, 32, 32
     dins    t3, t3, 32, 32
-    andi    t0, a0, 0x3
+    andi    t0, a0, 0x7
     beqz    t0, _loop_a
     or      v0, zero, a0
 _loop_u:
