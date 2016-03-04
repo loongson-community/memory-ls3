@@ -90,14 +90,11 @@ _loop_ah:
     gsldrc1 $f2, 0(a0)
     gsldrc1 $f4, 0(a1)
     dins    a0, zero, 0, 3
-    dins    a1, zero, 0, 3
     pcmpeqb $f6, $f2, $f0
-    pcmpeqb $f8, $f4, $f0
-    or      $f6, $f6, $f8
-    pcmpeqb $f8, $f2, $f4
-    nor     $f8, $f0, $f8
-    or      $f10, $f6, $f8
-    seq     $f0, $f10
+    dins    a1, zero, 0, 3
+    seq     $f0, $f6
+    bc1f    _mc8
+    seq     $f2, $f4
     bc1f    _mc8
     ADDIU   a0, 8
     ADDIU   a1, 8
