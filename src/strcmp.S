@@ -56,8 +56,7 @@ _mc8_1:
     pcmpeqb $f6, $f2, $f0
 _mc8_2:
     pcmpeqb $f4, $f2, $f4
-    nor     $f2, $f0, $f6
-    and     $f6, $f2, $f4
+    pandn   $f6, $f6, $f4
     dmfc1   v0, $f8
     mfc1    t0, $f6
     mfhc1   t1, $f6
