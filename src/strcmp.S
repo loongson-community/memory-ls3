@@ -54,6 +54,7 @@ _mc8:
     psubb   $f8, $f2, $f4
 _mc8_1:
     pcmpeqb $f6, $f2, $f0
+_mc8_2:
     pcmpeqb $f4, $f2, $f4
     nor     $f2, $f0, $f6
     and     $f6, $f2, $f4
@@ -78,10 +79,10 @@ _ll1:
     gsldlc1 $f2, 7-8(a0)
 _sk1:
     bc1f    _sk2
-    nop
+    pcmpeqb $f6, $f2, $f0
     gsldlc1 $f4, 7(a1)
 _sk2:
-    b       _mc8_1
+    b       _mc8_2
     psubb   $f8, $f2, $f4
 
 _loop_ah:
