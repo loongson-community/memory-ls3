@@ -29,18 +29,16 @@
 strcmp:
     andi    t0, a0, 7
     andi    t1, a1, 7
-    ori     t2, zero, 1
     beq     t0, t1, _loop_ah
     xor     $f0, $f0, $f0
 
     sltu    t2, t0, t1
+    nor     $f4, $f0, $f0
     move    t3, a0
-    movn    t0, t1, t2
     movz    a0, a1, t2
     movz    a1, t3, t2
+    movn    t0, t1, t2
 
-    nor     $f4, $f0, $f0
-    nor     $f2, $f0, $f0
     gsldrc1 $f4, 0(a1)
     gsldrc1 $f2, 0(a0)
     pcmpeqb $f8, $f4, $f0
@@ -52,12 +50,13 @@ strcmp:
     mtc1    t0, $f8
     dins    a1, zero, 0, 3
     dsrl    $f6, $f6, $f8
+    ADDIU   a0, 8
     and     $f2, $f2, $f6
     and     $f4, $f4, $f6
-    seq     $f2, $f4
-    bc1f    _mc8
-    ADDIU   a0, 8
     ADDIU   a1, 8
+    seq     $f2, $f4
+    bc1f    _mc8_1
+    psubb   $f8, $f2, $f4
 _loop:
     nor     $f2, $f0, $f0
     gsldrc1 $f2, 0(a0)
@@ -78,7 +77,6 @@ _mc8:
     psubb   $f8, $f2, $f4
 _mc8_1:
     pcmpeqb $f6, $f2, $f0
-_mc8_2:
     pcmpeqb $f4, $f2, $f4
     pandn   $f6, $f6, $f4
     dmfc1   v0, $f8
@@ -98,12 +96,13 @@ _mc8_2:
     movz    v0, v1, t2
 
     .align  5
-    .space  24
+    .space  20
 _loop_ah:
     nor     $f2, $f0, $f0
     nor     $f4, $f0, $f0
     gsldrc1 $f2, 0(a0)
     gsldrc1 $f4, 0(a1)
+    ori     t2, zero, 1
     dins    a0, zero, 0, 3
     pcmpeqb $f6, $f2, $f0
     dins    a1, zero, 0, 3
