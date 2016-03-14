@@ -79,15 +79,11 @@ _mc8_1:
     pcmpeqb $f6, $f2, $f0
     pcmpeqb $f4, $f2, $f4
     pandn   $f6, $f6, $f4
+    dmfc1   t0, $f6
     dmfc1   v0, $f8
-    mfc1    t0, $f6
-    mfhc1   t1, $f6
-    wsbh    t0, t0
-    wsbh    t1, t1
-    rotr    t0, 16
-    rotr    t1, 16
-    dins    t1, t0, 32, 32
-    dclo    t0, t1
+    dsbh    t0, t0
+    dshd    t0, t0
+    dclo    t0, t0
     dsrl    v0, t0
     andi    v0, 0xff
     seb     v0, v0
