@@ -56,7 +56,7 @@ strcmp:
     ADDIU   a1, 8
     seq     $f2, $f4
     bc1f    _mc8_1
-    psubb   $f8, $f2, $f4
+    pcmpeqb $f6, $f2, $f0
 _loop:
     nor     $f2, $f0, $f0
     gsldrc1 $f2, 0(a0)
@@ -74,22 +74,24 @@ _loop:
     ADDIU   a0, 8
 
 _mc8:
-    psubb   $f8, $f2, $f4
-_mc8_1:
     pcmpeqb $f6, $f2, $f0
-    pcmpeqb $f4, $f2, $f4
-    pandn   $f6, $f6, $f4
+_mc8_1:
+    pcmpeqb $f8, $f2, $f4
+    pandn   $f6, $f6, $f8
     dmfc1   t0, $f6
-    dmfc1   v0, $f8
+    dmfc1   v0, $f2
     dsbh    t0, t0
     dshd    t0, t0
     dclo    t0, t0
+    dmfc1   v1, $f4
     dsrl    v0, t0
     andi    v0, 0xff
-    seb     v0, v0
-    subu    v1, zero, v0
+    dsrl    v1, t0
+    andi    v1, 0xff
+    subu    a0, v1, v0
+    subu    v0, v0, v1
     jr      ra
-    movz    v0, v1, t2
+    movz    v0, a0, t2
 
     .align  5
     .space  20
@@ -119,7 +121,7 @@ _loop_a:
     bc1t    _loop_a
     ADDIU   a1, 8
     b       _mc8_1
-    psubb   $f8, $f2, $f4
+    pcmpeqb $f6, $f2, $f0
 
     .end    strcmp
     .size   strcmp, .-strcmp
